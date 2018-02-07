@@ -107,7 +107,6 @@ class Client(object):
         """
         self.token = token
 
-<<<<<<< Updated upstream
     def get_me(self, params=None):
         """Retrieve the properties and relationships of user object.
 
@@ -168,14 +167,6 @@ class Client(object):
 
     def _get_headers(self):
         return {'Authorization': 'Bearer ' + self.token['access_token']}
-=======
-    def get_me(self):
-        """
-        Obtiene el "profile" del usuario
-        :return: dictionary of user profile.
-        """
-        return self._get('me')
->>>>>>> Stashed changes
 
     def get_me_events(self):
         """
