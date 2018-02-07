@@ -216,17 +216,105 @@ class Client(object):
             return False
         return event
 
-    def create_calendar_event(self):
+    def create_calendar_event(
+            self, subject, content,
+            start_datetime, start_timezone, end_datetime,
+            end_timezone, recurrence_type, recurrence_interval,
+            recurrence_days_of_week, recurrence_range_type,
+            recurrence_range_startdate, recurrence_range_enddate,
+            location, attendees):
         """
-        Create an event in user calendar.
-        :return:
+        TODO: manual testing
+        Create a new calendar event.
+        Args:
+            subject: subject of event, string
+            content: content of event, string
+            start_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
+            start_timezone: in the format of Pacific Standard Time, string
+            end_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
+            end_timezone: in the format of Pacific Standard Time, string
+            recurrence_type: daily, weekly, absoluteMonthly, relativeMonthly, absoluteYearly, relativeYearly
+            recurrence_interval: The number of units between occurrences, can be in days, weeks, months, or years,
+                                depending on the type. Required.
+            recurrence_days_of_week: sunday, monday, tuesday, wednesday, thursday, friday, saturday
+            recurrence_range_type: endDate, noEnd, numbered
+            recurrence_range_startdate: The date to start applying the recurrence pattern. The first occurrence of the
+                                        meeting may be this date or later, depending on the recurrence pattern of the
+                                        event. Must be the same value as the start property of the recurring event.
+                                        Required.
+            recurrence_range_enddate:   Required if type is endDate, The date to stop applying the recurrence pattern.
+                                        Depending on the recurrence pattern of the event, the last occurrence of the
+                                        meeting may not be this date.
+            location:   string
+            attendees: list of dicts of the form:
+                        {"emailAddress": {"address": a['attendees_email'],"name": a['attendees_name']}
+
+        Returns:
+
         """
-        body = {}
+        attendees_list = [{
+            "emailAddress": {
+                "address": a['attendees_email'],
+                "name": a['attendees_name']
+            },
+            "type": a['attendees_type']
+            } for a in attendees]
+        body = {
+            "subject": subject,
+            "body": {
+                "contentType": "HTML",
+                "content": content
+            },
+            "start": {
+                "dateTime": start_datetime,
+                "timeZone": start_timezone
+            },
+            "end": {
+                "dateTime": end_datetime,
+                "timeZone": end_timezone
+            },
+            "recurrence": {
+                "pattern": {
+                    "type": recurrence_type,
+                    "interval": recurrence_interval,
+                    "daysOfWeek": recurrence_days_of_week
+                },
+                "range": {
+                    "type": recurrence_range_type,
+                    "startDate": recurrence_range_startdate,
+                    "endDate": recurrence_range_enddate
+                }
+            },
+            "location": {
+                "displayName": location
+            },
+            "attendees": attendees_list
+        }
+
         try:
-            response = self._post('me/events')
+            response = self._post('me/events', json=body)
             print('---> ', response)
         except Exception as e:
             print("Error donwloading data: ", e)
+            return False
+
+    def create_calendar(self, name):
+        """
+        Created a new calendar.
+        Args:
+            name: name of new calendar to be created, string.
+
+        Returns:
+
+        """
+        body = {
+            'name': '{}'.format(name)
+        }
+        try:
+            response = self._post('me/calendars', json=body)
+            return response
+        except Exception as e:
+            print('Error while creating calendar: ', e)
             return False
 
     def get_me_calendar(self, id_cal=None):
