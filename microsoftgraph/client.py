@@ -50,8 +50,7 @@ class Client(object):
         if state:
             params['state'] = None
 
-        url = self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(params)
-        return url
+        return self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(params)
 
     def exchange_code(self, redirect_uri, code):
         """Exchanges a code for a Token.
@@ -66,14 +65,14 @@ class Client(object):
             A dict.
 
         """
-        params = {
+        data = {
             'client_id': self.client_id,
             'redirect_uri': redirect_uri,
             'client_secret': self.client_secret,
             'code': code,
             'grant_type': 'authorization_code',
         }
-        return requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=params).json()
+        return requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data).json()
 
     def refresh_token(self, redirect_uri, refresh_token):
         """
@@ -89,14 +88,14 @@ class Client(object):
         Returns:
 
         """
-        params = {
+        data = {
             'client_id': self.client_id,
             'redirect_uri': redirect_uri,
             'client_secret': self.client_secret,
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token',
         }
-        return requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=params).json()
+        return requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data).json()
 
     def set_token(self, token):
         """Sets the Token for its use in this library.
@@ -121,7 +120,56 @@ class Client(object):
 
 
         """
-        return self._get('me', params=None)
+        return self._get(self.base_url + 'me', params=params)
+
+    def create_subscription(self, change_type, notification_url, resource, expiration_datetime, client_state=None):
+        """Creating a subscription is the first step to start receiving notifications for a resource.
+
+        Args:
+            change_type: The event type that caused the notification. For example, created on mail receive, or updated on marking a message read.
+            notification_url:
+            resource: The URI of the resource relative to https://graph.microsoft.com.
+            expiration_datetime: The expiration time for the subscription.
+            client_state: The clientState property specified in the subscription request.
+
+        Returns:
+
+        """
+        data = {
+            'changeType': change_type,
+            'notificationUrl': notification_url,
+            'resource': resource,
+            'expirationDateTime': expiration_datetime,
+            'clientState': client_state
+        }
+        return self._post('https://graph.microsoft.com/beta/' + 'subscriptions', json=data)
+
+    def renew_subscription(self, subscription_id, expiration_datetime):
+        """The client can renew a subscription with a specific expiration date of up to three days from the time
+        of request. The expirationDateTime property is required.
+
+
+        Args:
+            subscription_id:
+
+        Returns:
+
+        """
+        data = {
+            'expirationDateTime': expiration_datetime
+        }
+        return self._patch('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id), json=data)
+
+    def delete_subscription(self, subscription_id):
+        """The client can stop receiving notifications by deleting the subscription using its ID.
+
+        Args:
+            subscription_id:
+
+        Returns:
+
+        """
+        return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
 
     def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
         """Helper to send email from current user.
@@ -163,22 +211,32 @@ class Client(object):
                      'SaveToSentItems': 'true'}
 
         # Do a POST to Graph's sendMail API and return the response.
-        return self._post('me/microsoft.graph.sendMail', data=email_msg)
+        return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
 
-    def _get_headers(self):
-        return {'Authorization': 'Bearer ' + self.token['access_token']}
+    def _get(self, url, **kwargs):
+        return self._request('GET', url, **kwargs)
 
-    def _get(self, endpoint, params=None):
-        response = requests.get(self.base_url + endpoint, params=params, headers=self._get_headers())
-        return self._parse(response)
+    def _post(self, url, **kwargs):
+        return self._request('POST', url, **kwargs)
 
-    def _post(self, endpoint, params=None, data=None):
-        response = requests.post(self.base_url + endpoint, params=params, json=data, headers=self._get_headers())
-        return self._parse(response)
+    def _put(self, url, **kwargs):
+        return self._request('PUT', url, **kwargs)
 
-    def _delete(self, endpoint, params=None):
-        response = requests.delete(self.base_url + endpoint, params=params)
-        return self._parse(response)
+    def _patch(self, url, **kwargs):
+        return self._request('PATCH', url, **kwargs)
+
+    def _delete(self, url, **kwargs):
+        return self._request('DELETE', url, **kwargs)
+
+    def _request(self, method, url, headers=None, **kwargs):
+        _headers = {
+            'Authorization': 'Bearer ' + self.token['access_token'],
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        if headers:
+            _headers.update(headers)
+        return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
         if 'application/json' in response.headers['Content-Type']:
