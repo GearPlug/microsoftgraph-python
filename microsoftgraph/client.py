@@ -171,6 +171,209 @@ class Client(object):
         """
         return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
 
+    def get_me_events(self):
+        """
+        Obtiene los eventos del usuario
+        :return: dictionary of events.
+        """
+        try:
+            response = self._get('me/events')
+        except Exception as e:
+            return False
+        try:
+            event = {
+                'attendees': '{}'.format(response['value']['attendees']),
+                'categories': '{}'.format(response['value']['categories']),
+                'created': '{}'.format(response['value']['createdDateTime']),
+                'end': '{0}-TZ-{1} '.format(response['value']['end']['dateTime'], response['value']['end']['timeZone']),
+                'hasAttachments': '{}'.format(response['value']['hasAttachments']),
+                'iCalId': '{}'.format(response['value']['iCalId']),
+                'id': '{}'.format(response['value']['id']),
+                'importance': '{}'.format(response['value']['importance']),
+                'All Day': '{}'.format(response['value']['isAllDay']),
+                'cancelled': '{}'.format(response['value']['isCancelled']),
+                'isOrganizer': '{}'.format(response['value']['isOrganizer']),
+                'is reminder on': '{}'.format(response['value']['isReminderOn']),
+                'last modification': '{}'.format(response['value']['lastModifiedDateTime']),
+                'location': '{}'.format(response['value']['location']['address']),
+                'online Meeting Url': '{}'.format(response['value']['onlineMeetingUrl']),
+                'organizer name': '{}'.format(response['value']['emailAddress']['name']),
+                'organizer email': '{}'.format(response['value']['emailAddress']['address']),
+                'original End TimeZone': '{}'.format(response['value']['originalEndTimeZone']),
+                'original Start TimeZone': '{}'.format(response['value']['originalStartTimeZone']),
+                'recurrence': '{}'.format(response['value']['recurrence']),
+                'reminderMinutesBeforeStart': '{}'.format(response['value']['reminderMinutesBeforeStart']),
+                'response Requested': '{}'.format(response['value']['responseRequested']),
+                'response Status': '{}'.format(response['value']['responseStatus']),
+                'sensitivity': '{}'.format(response['value']['sensitivity']),
+                'series Master Id': '{}'.format(response['value']['seriesMasterId']),
+                'show As': '{}'.format(response['value']['showAs']),
+                'start': '{0}-TZ-{1} '.format(
+                    response['value']['start']['dateTime'], response['value']['start']['timeZone']),
+                'subject': '{}'.format(response['value']['subject']),
+                'type': '{}'.format(response['value']['type']),
+                'webLink': '{}'.format(response['value']['webLink']),
+            }
+        except Exception as e:
+            print('Error while formatting downloaded data: ', e)
+            return False
+        return event
+
+    def create_calendar_event(
+            self, subject, content,
+            start_datetime, start_timezone, end_datetime,
+            end_timezone, recurrence_type, recurrence_interval,
+            recurrence_days_of_week, recurrence_range_type,
+            recurrence_range_startdate, recurrence_range_enddate,
+            location, attendees):
+        """
+        TODO: manual testing
+        Create a new calendar event.
+        Args:
+            subject: subject of event, string
+            content: content of event, string
+            start_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
+            start_timezone: in the format of Pacific Standard Time, string
+            end_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
+            end_timezone: in the format of Pacific Standard Time, string
+            recurrence_type: daily, weekly, absoluteMonthly, relativeMonthly, absoluteYearly, relativeYearly
+            recurrence_interval: The number of units between occurrences, can be in days, weeks, months, or years,
+                                depending on the type. Required.
+            recurrence_days_of_week: sunday, monday, tuesday, wednesday, thursday, friday, saturday
+            recurrence_range_type: endDate, noEnd, numbered
+            recurrence_range_startdate: The date to start applying the recurrence pattern. The first occurrence of the
+                                        meeting may be this date or later, depending on the recurrence pattern of the
+                                        event. Must be the same value as the start property of the recurring event.
+                                        Required.
+            recurrence_range_enddate:   Required if type is endDate, The date to stop applying the recurrence pattern.
+                                        Depending on the recurrence pattern of the event, the last occurrence of the
+                                        meeting may not be this date.
+            location:   string
+            attendees: list of dicts of the form:
+                        {"emailAddress": {"address": a['attendees_email'],"name": a['attendees_name']}
+
+        Returns:
+
+        """
+        attendees_list = [{
+            "emailAddress": {
+                "address": a['attendees_email'],
+                "name": a['attendees_name']
+            },
+            "type": a['attendees_type']
+        } for a in attendees]
+        body = {
+            "subject": subject,
+            "body": {
+                "contentType": "HTML",
+                "content": content
+            },
+            "start": {
+                "dateTime": start_datetime,
+                "timeZone": start_timezone
+            },
+            "end": {
+                "dateTime": end_datetime,
+                "timeZone": end_timezone
+            },
+            "recurrence": {
+                "pattern": {
+                    "type": recurrence_type,
+                    "interval": recurrence_interval,
+                    "daysOfWeek": recurrence_days_of_week
+                },
+                "range": {
+                    "type": recurrence_range_type,
+                    "startDate": recurrence_range_startdate,
+                    "endDate": recurrence_range_enddate
+                }
+            },
+            "location": {
+                "displayName": location
+            },
+            "attendees": attendees_list
+        }
+
+        try:
+            response = self._post('me/events', json=body)
+            print('---> ', response)
+        except Exception as e:
+            print("Error donwloading data: ", e)
+            return False
+
+    def create_calendar(self, name):
+        """
+        Created a new calendar.
+        Args:
+            name: name of new calendar to be created, string.
+
+        Returns:
+
+        """
+        body = {
+            'name': '{}'.format(name)
+        }
+        try:
+            response = self._post('me/calendars', json=body)
+            return response
+        except Exception as e:
+            print('Error while creating calendar: ', e)
+            return False
+
+    def get_me_calendar(self, id_cal=None):
+        """
+        TODO: manual test.
+        Specific calendar.
+        :return:
+        """
+        url = 'me/calendar/{}'.format(id_cal) if id_cal is not None else 'me/calendar'
+        try:
+            response = self._get(url)
+            print('---> ', response)
+        except Exception as e:
+            print("Error donwloading data: ", e)
+            return False
+        try:
+            return [{
+                'id': c['id'],
+                'canEdit': c['canEdit'],
+                'canShare': c['canShare'],
+                'canViewPrivateItems': c['canViewPrivateItems'],
+                'changeKey': c['changeKey'],
+                'color': c['color'],
+                'name': c['name'],
+                'owner': '{0}-{1}'.format(c['owner']['name'], c['owner']['address']),
+            } for c in response['value']]
+        except Exception as e:
+            print('Error formating downloaded data: ', e)
+            return False
+
+    def get_me_calendars(self):
+        """
+        All the calendars of user.
+        :return:
+        """
+        try:
+            response = self._get('me/calendars')
+            print('---> ', response)
+        except Exception as e:
+            print('Error downloading data: ', e)
+            return False
+        try:
+            return [{
+                'id': c['id'],
+                'name': c['name'],
+                'color': c['color'],
+                'changeKey': c['changeKey'],
+                'canShare': c['canShare'],
+                'canViewPrivateItems': c['canViewPrivateItems'],
+                'canEdit': c['canEdit'],
+                'owner': c['canEdit'],
+            } for c in response['value']]
+        except Exception as e:
+            print('Error formating downloaded data: ', e)
+            return False
+
     def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
         """Helper to send email from current user.
 
