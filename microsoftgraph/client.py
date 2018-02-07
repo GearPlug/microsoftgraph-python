@@ -178,46 +178,9 @@ class Client(object):
         """
         try:
             response = self._get('me/events')
+            return response
         except Exception as e:
             return False
-        try:
-            event = {
-                'attendees': '{}'.format(response['value']['attendees']),
-                'categories': '{}'.format(response['value']['categories']),
-                'created': '{}'.format(response['value']['createdDateTime']),
-                'end': '{0}-TZ-{1} '.format(response['value']['end']['dateTime'], response['value']['end']['timeZone']),
-                'hasAttachments': '{}'.format(response['value']['hasAttachments']),
-                'iCalId': '{}'.format(response['value']['iCalId']),
-                'id': '{}'.format(response['value']['id']),
-                'importance': '{}'.format(response['value']['importance']),
-                'All Day': '{}'.format(response['value']['isAllDay']),
-                'cancelled': '{}'.format(response['value']['isCancelled']),
-                'isOrganizer': '{}'.format(response['value']['isOrganizer']),
-                'is reminder on': '{}'.format(response['value']['isReminderOn']),
-                'last modification': '{}'.format(response['value']['lastModifiedDateTime']),
-                'location': '{}'.format(response['value']['location']['address']),
-                'online Meeting Url': '{}'.format(response['value']['onlineMeetingUrl']),
-                'organizer name': '{}'.format(response['value']['emailAddress']['name']),
-                'organizer email': '{}'.format(response['value']['emailAddress']['address']),
-                'original End TimeZone': '{}'.format(response['value']['originalEndTimeZone']),
-                'original Start TimeZone': '{}'.format(response['value']['originalStartTimeZone']),
-                'recurrence': '{}'.format(response['value']['recurrence']),
-                'reminderMinutesBeforeStart': '{}'.format(response['value']['reminderMinutesBeforeStart']),
-                'response Requested': '{}'.format(response['value']['responseRequested']),
-                'response Status': '{}'.format(response['value']['responseStatus']),
-                'sensitivity': '{}'.format(response['value']['sensitivity']),
-                'series Master Id': '{}'.format(response['value']['seriesMasterId']),
-                'show As': '{}'.format(response['value']['showAs']),
-                'start': '{0}-TZ-{1} '.format(
-                    response['value']['start']['dateTime'], response['value']['start']['timeZone']),
-                'subject': '{}'.format(response['value']['subject']),
-                'type': '{}'.format(response['value']['type']),
-                'webLink': '{}'.format(response['value']['webLink']),
-            }
-        except Exception as e:
-            print('Error while formatting downloaded data: ', e)
-            return False
-        return event
 
     def create_calendar_event(
             self, subject, content,
@@ -296,9 +259,8 @@ class Client(object):
 
         try:
             response = self._post('me/events', json=body)
-            print('---> ', response)
+            return response
         except Exception as e:
-            print("Error donwloading data: ", e)
             return False
 
     def create_calendar(self, name):
@@ -317,7 +279,6 @@ class Client(object):
             response = self._post('me/calendars', json=body)
             return response
         except Exception as e:
-            print('Error while creating calendar: ', e)
             return False
 
     def get_me_calendar(self, id_cal=None):
@@ -329,23 +290,8 @@ class Client(object):
         url = 'me/calendar/{}'.format(id_cal) if id_cal is not None else 'me/calendar'
         try:
             response = self._get(url)
-            print('---> ', response)
+            return response
         except Exception as e:
-            print("Error donwloading data: ", e)
-            return False
-        try:
-            return [{
-                'id': c['id'],
-                'canEdit': c['canEdit'],
-                'canShare': c['canShare'],
-                'canViewPrivateItems': c['canViewPrivateItems'],
-                'changeKey': c['changeKey'],
-                'color': c['color'],
-                'name': c['name'],
-                'owner': '{0}-{1}'.format(c['owner']['name'], c['owner']['address']),
-            } for c in response['value']]
-        except Exception as e:
-            print('Error formating downloaded data: ', e)
             return False
 
     def get_me_calendars(self):
@@ -355,23 +301,8 @@ class Client(object):
         """
         try:
             response = self._get('me/calendars')
-            print('---> ', response)
+            return response
         except Exception as e:
-            print('Error downloading data: ', e)
-            return False
-        try:
-            return [{
-                'id': c['id'],
-                'name': c['name'],
-                'color': c['color'],
-                'changeKey': c['changeKey'],
-                'canShare': c['canShare'],
-                'canViewPrivateItems': c['canViewPrivateItems'],
-                'canEdit': c['canEdit'],
-                'owner': c['canEdit'],
-            } for c in response['value']]
-        except Exception as e:
-            print('Error formating downloaded data: ', e)
             return False
 
     def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
