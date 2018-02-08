@@ -1,6 +1,7 @@
 import base64
 import mimetypes
 import requests
+from microsoftgraph import exceptions
 from urllib.parse import urlencode, urlparse
 
 
@@ -122,6 +123,18 @@ class Client(object):
         """
         return self._get(self.base_url + 'me', params=params)
 
+    def get_message(self, message_id, params=None):
+        """Retrieve the properties and relationships of a message object.
+
+        Args:
+            message_id: A dict.
+
+        Returns:
+
+
+        """
+        return self._get(self.base_url + 'me/messages/' + message_id, params=params)
+
     def create_subscription(self, change_type, notification_url, resource, expiration_datetime, client_state=None):
         """Creating a subscription is the first step to start receiving notifications for a resource.
 
@@ -188,7 +201,7 @@ class Client(object):
             end_timezone, recurrence_type, recurrence_interval,
             recurrence_days_of_week, recurrence_range_type,
             recurrence_range_startdate, recurrence_range_enddate,
-            location, attendees):
+            location, attendees, calendar=None):
         """
         TODO: manual testing
         Create a new calendar event.
@@ -256,9 +269,9 @@ class Client(object):
             },
             "attendees": attendees_list
         }
-
+        url = 'me/calendars/{}/events'.format(calendar) if calendar is not None else 'me/events'
         try:
-            response = self._post('me/events', json=body)
+            response = self._post(url, json=body)
             return response
         except Exception as e:
             return False
@@ -373,6 +386,56 @@ class Client(object):
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
+        status_code = response.status_code
         if 'application/json' in response.headers['Content-Type']:
-            return response.json()
-        return response.text
+            r = response.json()
+        else:
+            r = response.text
+        if status_code == 200 or status_code == 201:
+            return r
+        elif status_code == 204:
+            return None
+        elif status_code == 400:
+            raise exceptions.BadRequest(r)
+        elif status_code == 401:
+            raise exceptions.Unauthorized(r)
+        elif status_code == 403:
+            raise exceptions.Forbidden(r)
+        elif status_code == 404:
+            raise exceptions.NotFound(r)
+        elif status_code == 405:
+            raise exceptions.MethodNotAllowed(r)
+        elif status_code == 406:
+            raise exceptions.NotAcceptable(r)
+        elif status_code == 409:
+            raise exceptions.Conflict(r)
+        elif status_code == 410:
+            raise exceptions.Gone(r)
+        elif status_code == 411:
+            raise exceptions.LengthRequired(r)
+        elif status_code == 412:
+            raise exceptions.PreconditionFailed(r)
+        elif status_code == 413:
+            raise exceptions.RequestEntityTooLarge(r)
+        elif status_code == 415:
+            raise exceptions.UnsupportedMediaType(r)
+        elif status_code == 416:
+            raise exceptions.RequestedRangeNotSatisfiable(r)
+        elif status_code == 422:
+            raise exceptions.UnprocessableEntity(r)
+        elif status_code == 429:
+            raise exceptions.TooManyRequests(r)
+        elif status_code == 500:
+            raise exceptions.InternalServerError(r)
+        elif status_code == 501:
+            raise exceptions.NotImplemented(r)
+        elif status_code == 503:
+            raise exceptions.ServiceUnavailable(r)
+        elif status_code == 504:
+            raise exceptions.GatewayTimeout(r)
+        elif status_code == 507:
+            raise exceptions.InsufficientStorage(r)
+        elif status_code == 509:
+            raise exceptions.BandwidthLimitExceeded(r)
+        else:
+            raise exceptions.UnknownError(r)
