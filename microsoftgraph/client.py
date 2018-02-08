@@ -189,7 +189,7 @@ class Client(object):
             end_timezone, recurrence_type, recurrence_interval,
             recurrence_days_of_week, recurrence_range_type,
             recurrence_range_startdate, recurrence_range_enddate,
-            location, attendees):
+            location, attendees, calendar=None):
         """
         TODO: manual testing
         Create a new calendar event.
@@ -257,9 +257,9 @@ class Client(object):
             },
             "attendees": attendees_list
         }
-
+        url = 'me/calendars/{}/events'.format(calendar) if calendar is not None else 'me/events'
         try:
-            response = self._post('me/events', json=body)
+            response = self._post(url, json=body)
             return response
         except Exception as e:
             return False
