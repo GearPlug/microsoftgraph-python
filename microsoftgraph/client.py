@@ -123,6 +123,18 @@ class Client(object):
         """
         return self._get(self.base_url + 'me', params=params)
 
+    def get_message(self, message_id, params=None):
+        """Retrieve the properties and relationships of a message object.
+
+        Args:
+            message_id: A dict.
+
+        Returns:
+
+
+        """
+        return self._get(self.base_url + 'me/messages/' + message_id, params=params)
+
     def create_subscription(self, change_type, notification_url, resource, expiration_datetime, client_state=None):
         """Creating a subscription is the first step to start receiving notifications for a resource.
 
