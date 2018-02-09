@@ -360,9 +360,13 @@ class Client(object):
         return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
 
     # Outlook Contacts Methods
-    def outlook_get_contacts(self, params=None):
+    def outlook_get_me_contacts(self, params=None):
         url = "{0}me/contacts".format(self.base_url)
         return self._get(url, params=params)
+
+    def outlook_create_me_contact(self, **kwargs):
+        url = "{0}me/contacts".format(self.base_url)
+        return self._post(url, **kwargs)
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
