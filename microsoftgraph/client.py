@@ -9,7 +9,6 @@ class Client(object):
     AUTHORITY_URL = 'https://login.microsoftonline.com/'
     AUTH_ENDPOINT = '/oauth2/v2.0/authorize?'
     TOKEN_ENDPOINT = '/oauth2/v2.0/token'
-
     RESOURCE = 'https://graph.microsoft.com/'
 
     def __init__(self, client_id, client_secret, api_version='v1.0', account_type='common'):
@@ -360,6 +359,11 @@ class Client(object):
         # Do a POST to Graph's sendMail API and return the response.
         return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
 
+    # Outlook Contacts Methods
+    def outlook_get_contacts(self, params=None):
+        url = "{0}me/contacts".format(self.base_url)
+        return self._get(url, params=params)
+
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
 
@@ -377,7 +381,7 @@ class Client(object):
 
     def _request(self, method, url, headers=None, **kwargs):
         _headers = {
-            'Authorization': 'Bearer ' + self.token,
+            'Authorization': 'Bearer ' + self.token["access_token"],
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
