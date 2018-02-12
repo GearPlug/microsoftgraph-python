@@ -396,7 +396,7 @@ class Client(object):
 
     def _request(self, method, url, headers=None, **kwargs):
         _headers = {
-            'Authorization': 'Bearer ' + self.token,
+            'Authorization': 'Bearer ' + self.token['access_token'],
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
