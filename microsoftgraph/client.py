@@ -371,6 +371,10 @@ class Client(object):
         url = "{0}me/contacts".format(self.base_url)
         return self._post(url, **kwargs)
 
+    def outlook_create_contact_in_folder(self, folder_id, **kwargs):
+        url = "{0}/me/contactFolders/{1}/contacts".format(self.base_url, folder_id)
+        return self._post(url, **kwargs)
+
     def outlook_get_contact_folders(self, params=None):
         url = "{0}me/contactFolders".format(self.base_url)
         return self._get(url, params=params)
