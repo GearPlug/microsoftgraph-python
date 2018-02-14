@@ -391,7 +391,7 @@ class Client(object):
             r = response.json()
         else:
             r = response.text
-        if status_code == 200 or status_code == 201:
+        if status_code in (200, 201, 202):
             return r
         elif status_code == 204:
             return None
