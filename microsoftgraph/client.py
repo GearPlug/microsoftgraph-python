@@ -9,7 +9,6 @@ class Client(object):
     AUTHORITY_URL = 'https://login.microsoftonline.com/'
     AUTH_ENDPOINT = '/oauth2/v2.0/authorize?'
     TOKEN_ENDPOINT = '/oauth2/v2.0/token'
-
     RESOURCE = 'https://graph.microsoft.com/'
 
     def __init__(self, client_id, client_secret, api_version='v1.0', account_type='common'):
@@ -359,6 +358,30 @@ class Client(object):
 
         # Do a POST to Graph's sendMail API and return the response.
         return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
+
+    # Outlook Contacts Methods
+    def outlook_get_me_contacts(self, data_id=None, params=None):
+        if data_id is None:
+            url = "{0}me/contacts".format(self.base_url)
+        else:
+            url = "{0}me/contacts/{1}".format(self.base_url, data_id)
+        return self._get(url, params=params)
+
+    def outlook_create_me_contact(self, **kwargs):
+        url = "{0}me/contacts".format(self.base_url)
+        return self._post(url, **kwargs)
+
+    def outlook_create_contact_in_folder(self, folder_id, **kwargs):
+        url = "{0}/me/contactFolders/{1}/contacts".format(self.base_url, folder_id)
+        return self._post(url, **kwargs)
+
+    def outlook_get_contact_folders(self, params=None):
+        url = "{0}me/contactFolders".format(self.base_url)
+        return self._get(url, params=params)
+
+    def outlook_create_contact_folder(self, **kwargs):
+        url = "{0}me/contactFolders".format(self.base_url)
+        return self._post(url, **kwargs)
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
