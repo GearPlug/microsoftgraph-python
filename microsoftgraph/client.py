@@ -87,7 +87,7 @@ class Client(object):
             response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
-    def refresh_token(self, redirect_uri, refresh_token, office365=True):
+    def refresh_token(self, redirect_uri, refresh_token, office365=False):
         """
 
         Args:
@@ -114,7 +114,7 @@ class Client(object):
             response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
-    def set_token(self, token, office365=True):
+    def set_token(self, token, office365=False):
         """Sets the Token for its use in this library.
 
         Args:
@@ -125,7 +125,7 @@ class Client(object):
             self.office365_token = token
         else:
             self.token = token
-
+    
     @token_required
     def get_me(self, params=None):
         """Retrieve the properties and relationships of user object.
