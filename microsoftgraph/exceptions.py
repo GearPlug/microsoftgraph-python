@@ -6,7 +6,7 @@ class UnknownError(BaseError):
     pass
 
 
-class AccessTokenRequired(BaseError):
+class TokenRequired(BaseError):
     pass
 
 

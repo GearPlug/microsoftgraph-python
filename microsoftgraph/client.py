@@ -42,7 +42,10 @@ class Client(object):
             about the user's state in the app before the authentication request occurred, such as the page or view
             they were on.
 
+            office365: Get authorization url for office 365 instead graph.
+
         Returns:
+            A string.
 
         """
         params = {
@@ -69,6 +72,8 @@ class Client(object):
             your app.  It must exactly match one of the redirect_uris you registered in the app registration portal
 
             code: The authorization_code that you acquired in the first leg of the flow.
+
+            office365: Exchange code for office 365 instead graph.
 
         Returns:
             A dict.
@@ -98,7 +103,10 @@ class Client(object):
             after the current access token expires. Refresh tokens are long-lived, and can be used to retain access
             to resources for extended periods of time.
 
+            office365: Refresh token for office 365 instead graph.
+
         Returns:
+            A dict.
 
         """
         data = {
@@ -120,12 +128,14 @@ class Client(object):
         Args:
             token: A string with the Token.
 
+            office365: Set token for office 365 instead graph.
+
         """
         if office365:
             self.office365_token = token
         else:
             self.token = token
-    
+
     @token_required
     def get_me(self, params=None):
         """Retrieve the properties and relationships of user object.
@@ -138,7 +148,7 @@ class Client(object):
             params: A dict.
 
         Returns:
-
+            A dict.
 
         """
         return self._get(self.base_url + 'me', params=params)
@@ -149,9 +159,10 @@ class Client(object):
 
         Args:
             message_id: A dict.
+            params:
 
         Returns:
-
+            A dict.
 
         """
         return self._get(self.base_url + 'me/messages/' + message_id, params=params)
@@ -161,13 +172,15 @@ class Client(object):
         """Creating a subscription is the first step to start receiving notifications for a resource.
 
         Args:
-            change_type: The event type that caused the notification. For example, created on mail receive, or updated on marking a message read.
+            change_type: The event type that caused the notification. For example, created on mail receive, or updated
+            on marking a message read.
             notification_url:
             resource: The URI of the resource relative to https://graph.microsoft.com.
             expiration_datetime: The expiration time for the subscription.
             client_state: The clientState property specified in the subscription request.
 
         Returns:
+            A dict.
 
         """
         data = {
@@ -187,8 +200,10 @@ class Client(object):
 
         Args:
             subscription_id:
+            expiration_datetime:
 
         Returns:
+            A dict.
 
         """
         data = {
@@ -204,6 +219,7 @@ class Client(object):
             subscription_id:
 
         Returns:
+            None.
 
         """
         return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
@@ -250,7 +266,7 @@ class Client(object):
 
         Args:
             section_id:
-            content:
+            files:
 
         Returns:
             A dict.
@@ -272,13 +288,9 @@ class Client(object):
         return self._get(self.base_url + 'me/events')
 
     @token_required
-    def create_calendar_event(
-            self, subject, content,
-            start_datetime, start_timezone, end_datetime,
-            end_timezone, recurrence_type, recurrence_interval,
-            recurrence_days_of_week, recurrence_range_type,
-            recurrence_range_startdate, recurrence_range_enddate,
-            location, attendees, calendar=None):
+    def create_calendar_event(self, subject, content, start_datetime, start_timezone, end_datetime, end_timezone,
+                              recurrence_type, recurrence_interval, recurrence_days_of_week, recurrence_range_type,
+                              recurrence_range_startdate, recurrence_range_enddate, location, attendees, calendar=None):
         """
         Create a new calendar event.
 
@@ -304,8 +316,10 @@ class Client(object):
             location:   string
             attendees: list of dicts of the form:
                         {"emailAddress": {"address": a['attendees_email'],"name": a['attendees_name']}
+            calendar:
 
         Returns:
+            A dict.
 
         """
         attendees_list = [{
@@ -362,6 +376,7 @@ class Client(object):
             name:
 
         Returns:
+            A dict.
 
         """
         body = {
@@ -370,24 +385,12 @@ class Client(object):
         return self._post(self.base_url + 'me/calendars', json=body)
 
     @token_required
-    def get_me_calendar(self, calendar_id=None):
-        """Get the properties and relationships of a calendar object. The calendar can be one for a user,
-        or the default calendar of an Office 365 group.
-
-        Args:
-            calendar_id:
-
-        Returns:
-
-        """
-        url = 'me/calendar/{}'.format(calendar_id) if calendar_id is not None else 'me/calendar'
-        return self._get(self.base_url + url)
-
-    @token_required
     def get_me_calendars(self):
-        """
+        """Get all the user's calendars (/calendars navigation property), get the calendars from the default
+        calendar group or from a specific calendar group.
 
         Returns:
+            A dict.
 
         """
         return self._get(self.base_url + 'me/calendars')
