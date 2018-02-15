@@ -183,16 +183,67 @@ class Client(object):
         """
         return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
 
+    def list_notebooks(self):
+        """Retrieve a list of notebook objects.
+
+        Returns:
+            A dict.
+
+        """
+        return self._get(self.base_url + 'me/onenote/notebooks')
+
+    def get_notebook(self, notebook_id):
+        """Retrieve the properties and relationships of a notebook object.
+
+        Args:
+            notebook_id:
+
+        Returns:
+            A dict.
+
+        """
+        return self._get(self.base_url + 'me/onenote/notebooks/' + notebook_id)
+
+    def get_notebook_sections(self, notebook_id):
+        """Retrieve the properties and relationships of a notebook object.
+
+        Args:
+            notebook_id:
+
+        Returns:
+            A dict.
+
+        """
+        return self._get(self.base_url + 'me/onenote/notebooks/{}/sections'.format(notebook_id))
+
+    def create_page(self, section_id, files):
+        """Create a new page in the specified section.
+
+        Args:
+            section_id:
+            content:
+
+        Returns:
+            A dict.
+
+        """
+        # headers = {
+        #     'Content-Type': 'text/html'
+        # }
+        headers = None
+        return self._post(self.base_url + '/me/onenote/sections/{}/pages'.format(section_id), headers=headers, files=files)
+
     def get_me_events(self):
+        """Get a list of event objects in the user's mailbox. The list contains single instance meetings and
+        series masters.
+
+        Currently, this operation returns event bodies in only HTML format.
+
+        Returns:
+            A dict.
+
         """
-        Obtiene los eventos del usuario
-        :return: dictionary of events.
-        """
-        try:
-            response = self._get('me/events')
-            return response
-        except Exception as e:
-            return False
+        return self._get(self.base_url + 'me/events')
 
     def create_calendar_event(
             self, subject, content,
@@ -202,8 +253,8 @@ class Client(object):
             recurrence_range_startdate, recurrence_range_enddate,
             location, attendees, calendar=None):
         """
-        TODO: manual testing
         Create a new calendar event.
+
         Args:
             subject: subject of event, string
             content: content of event, string
@@ -269,17 +320,18 @@ class Client(object):
             "attendees": attendees_list
         }
         url = 'me/calendars/{}/events'.format(calendar) if calendar is not None else 'me/events'
-        try:
-            response = self._post(url, json=body)
-            return response
-        except Exception as e:
-            return False
+        return self._post(self.base_url + url, json=body)
 
     def create_calendar(self, name):
-        """
-        Created a new calendar.
+        """Create an event in the user's default calendar or specified calendar.
+
+        You can specify the time zone for each of the start and end times of the event as part of these values,
+        as the  start and end properties are of dateTimeTimeZone type.
+
+        When an event is sent, the server sends invitations to all the attendees.
+
         Args:
-            name: name of new calendar to be created, string.
+            name:
 
         Returns:
 
@@ -287,35 +339,28 @@ class Client(object):
         body = {
             'name': '{}'.format(name)
         }
-        try:
-            response = self._post('me/calendars', json=body)
-            return response
-        except Exception as e:
-            return False
+        return self._post(self.base_url + 'me/calendars', json=body)
 
-    def get_me_calendar(self, id_cal=None):
+    def get_me_calendar(self, calendar_id=None):
+        """Get the properties and relationships of a calendar object. The calendar can be one for a user,
+        or the default calendar of an Office 365 group.
+
+        Args:
+            calendar_id:
+
+        Returns:
+
         """
-        TODO: manual test.
-        Specific calendar.
-        :return:
-        """
-        url = 'me/calendar/{}'.format(id_cal) if id_cal is not None else 'me/calendar'
-        try:
-            response = self._get(url)
-            return response
-        except Exception as e:
-            return False
+        url = 'me/calendar/{}'.format(calendar_id) if calendar_id is not None else 'me/calendar'
+        return self._get(self.base_url + url)
 
     def get_me_calendars(self):
         """
-        All the calendars of user.
-        :return:
+
+        Returns:
+
         """
-        try:
-            response = self._get('me/calendars')
-            return response
-        except Exception as e:
-            return False
+        return self._get(self.base_url + 'me/calendars')
 
     def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
         """Helper to send email from current user.
@@ -409,6 +454,7 @@ class Client(object):
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
+        print(response.text)
         status_code = response.status_code
         if 'application/json' in response.headers['Content-Type']:
             r = response.json()
