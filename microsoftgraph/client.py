@@ -2,6 +2,7 @@ import base64
 import mimetypes
 import requests
 from microsoftgraph import exceptions
+from microsoftgraph.decorators import token_required
 from urllib.parse import urlencode, urlparse
 
 
@@ -11,6 +12,10 @@ class Client(object):
     TOKEN_ENDPOINT = '/oauth2/v2.0/token'
     RESOURCE = 'https://graph.microsoft.com/'
 
+    OFFICE365_AUTHORITY_URL = 'https://login.live.com'
+    OFFICE365_AUTH_ENDPOINT = '/oauth20_authorize.srf?'
+    OFFICE365_TOKEN_ENDPOINT = '/oauth20_token.srf'
+
     def __init__(self, client_id, client_secret, api_version='v1.0', account_type='common'):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -19,8 +24,9 @@ class Client(object):
 
         self.base_url = self.RESOURCE + self.api_version + '/'
         self.token = None
+        self.office365_token = None
 
-    def authorization_url(self, redirect_uri, scope, state=None):
+    def authorization_url(self, redirect_uri, scope, state=None, office365=False):
         """
 
         Args:
@@ -49,10 +55,13 @@ class Client(object):
 
         if state:
             params['state'] = None
+        if office365:
+            response = self.OFFICE365_AUTHORITY_URL + self.OFFICE365_AUTH_ENDPOINT + urlencode(params)
+        else:
+            response = self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(params)
+        return response
 
-        return self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(params)
-
-    def exchange_code(self, redirect_uri, code):
+    def exchange_code(self, redirect_uri, code, office365=False):
         """Exchanges a code for a Token.
 
         Args:
@@ -72,9 +81,13 @@ class Client(object):
             'code': code,
             'grant_type': 'authorization_code',
         }
-        return requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data).json()
+        if office365:
+            response = requests.post(self.OFFICE365_AUTHORITY_URL + self.OFFICE365_TOKEN_ENDPOINT, data=data)
+        else:
+            response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
+        return self._parse(response)
 
-    def refresh_token(self, redirect_uri, refresh_token):
+    def refresh_token(self, redirect_uri, refresh_token, office365=True):
         """
 
         Args:
@@ -95,17 +108,25 @@ class Client(object):
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token',
         }
-        return requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data).json()
+        if office365:
+            response = requests.post(self.OFFICE365_AUTHORITY_URL + self.OFFICE365_TOKEN_ENDPOINT, data=data)
+        else:
+            response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
+        return self._parse(response)
 
-    def set_token(self, token):
+    def set_token(self, token, office365=True):
         """Sets the Token for its use in this library.
 
         Args:
             token: A string with the Token.
 
         """
-        self.token = token
+        if office365:
+            self.office365_token = token
+        else:
+            self.token = token
 
+    @token_required
     def get_me(self, params=None):
         """Retrieve the properties and relationships of user object.
 
@@ -122,6 +143,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me', params=params)
 
+    @token_required
     def get_message(self, message_id, params=None):
         """Retrieve the properties and relationships of a message object.
 
@@ -134,6 +156,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/messages/' + message_id, params=params)
 
+    @token_required
     def create_subscription(self, change_type, notification_url, resource, expiration_datetime, client_state=None):
         """Creating a subscription is the first step to start receiving notifications for a resource.
 
@@ -156,6 +179,7 @@ class Client(object):
         }
         return self._post('https://graph.microsoft.com/beta/' + 'subscriptions', json=data)
 
+    @token_required
     def renew_subscription(self, subscription_id, expiration_datetime):
         """The client can renew a subscription with a specific expiration date of up to three days from the time
         of request. The expirationDateTime property is required.
@@ -172,6 +196,7 @@ class Client(object):
         }
         return self._patch('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id), json=data)
 
+    @token_required
     def delete_subscription(self, subscription_id):
         """The client can stop receiving notifications by deleting the subscription using its ID.
 
@@ -183,6 +208,7 @@ class Client(object):
         """
         return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
 
+    @token_required
     def list_notebooks(self):
         """Retrieve a list of notebook objects.
 
@@ -192,6 +218,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/onenote/notebooks')
 
+    @token_required
     def get_notebook(self, notebook_id):
         """Retrieve the properties and relationships of a notebook object.
 
@@ -204,6 +231,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/onenote/notebooks/' + notebook_id)
 
+    @token_required
     def get_notebook_sections(self, notebook_id):
         """Retrieve the properties and relationships of a notebook object.
 
@@ -216,6 +244,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/onenote/notebooks/{}/sections'.format(notebook_id))
 
+    @token_required
     def create_page(self, section_id, files):
         """Create a new page in the specified section.
 
@@ -227,12 +256,9 @@ class Client(object):
             A dict.
 
         """
-        # headers = {
-        #     'Content-Type': 'text/html'
-        # }
-        headers = None
-        return self._post(self.base_url + '/me/onenote/sections/{}/pages'.format(section_id), headers=headers, files=files)
+        return self._post(self.base_url + '/me/onenote/sections/{}/pages'.format(section_id), files=files)
 
+    @token_required
     def get_me_events(self):
         """Get a list of event objects in the user's mailbox. The list contains single instance meetings and
         series masters.
@@ -245,6 +271,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/events')
 
+    @token_required
     def create_calendar_event(
             self, subject, content,
             start_datetime, start_timezone, end_datetime,
@@ -322,6 +349,7 @@ class Client(object):
         url = 'me/calendars/{}/events'.format(calendar) if calendar is not None else 'me/events'
         return self._post(self.base_url + url, json=body)
 
+    @token_required
     def create_calendar(self, name):
         """Create an event in the user's default calendar or specified calendar.
 
@@ -341,6 +369,7 @@ class Client(object):
         }
         return self._post(self.base_url + 'me/calendars', json=body)
 
+    @token_required
     def get_me_calendar(self, calendar_id=None):
         """Get the properties and relationships of a calendar object. The calendar can be one for a user,
         or the default calendar of an Office 365 group.
@@ -354,6 +383,7 @@ class Client(object):
         url = 'me/calendar/{}'.format(calendar_id) if calendar_id is not None else 'me/calendar'
         return self._get(self.base_url + url)
 
+    @token_required
     def get_me_calendars(self):
         """
 
@@ -362,6 +392,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/calendars')
 
+    @token_required
     def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
         """Helper to send email from current user.
 
@@ -404,7 +435,7 @@ class Client(object):
         # Do a POST to Graph's sendMail API and return the response.
         return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
 
-    # Outlook Contacts Methods
+    @token_required
     def outlook_get_me_contacts(self, data_id=None, params=None):
         if data_id is None:
             url = "{0}me/contacts".format(self.base_url)
@@ -412,18 +443,22 @@ class Client(object):
             url = "{0}me/contacts/{1}".format(self.base_url, data_id)
         return self._get(url, params=params)
 
+    @token_required
     def outlook_create_me_contact(self, **kwargs):
         url = "{0}me/contacts".format(self.base_url)
         return self._post(url, **kwargs)
 
+    @token_required
     def outlook_create_contact_in_folder(self, folder_id, **kwargs):
         url = "{0}/me/contactFolders/{1}/contacts".format(self.base_url, folder_id)
         return self._post(url, **kwargs)
 
+    @token_required
     def outlook_get_contact_folders(self, params=None):
         url = "{0}me/contactFolders".format(self.base_url)
         return self._get(url, params=params)
 
+    @token_required
     def outlook_create_contact_folder(self, **kwargs):
         url = "{0}me/contactFolders".format(self.base_url)
         return self._post(url, **kwargs)
@@ -454,7 +489,6 @@ class Client(object):
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
-        print(response.text)
         status_code = response.status_code
         if 'application/json' in response.headers['Content-Type']:
             r = response.json()

@@ -6,6 +6,10 @@ class UnknownError(BaseError):
     pass
 
 
+class AccessTokenRequired(BaseError):
+    pass
+
+
 class BadRequest(BaseError):
     pass
 
