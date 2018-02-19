@@ -3,7 +3,7 @@ import mimetypes
 import requests
 from microsoftgraph import exceptions
 from microsoftgraph.decorators import token_required
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode, urlparse, quote_plus
 
 
 class Client(object):
@@ -87,7 +87,7 @@ class Client(object):
             response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
-    def refresh_token(self, redirect_uri, refresh_token, office365=True):
+    def refresh_token(self, redirect_uri, refresh_token, office365=False):
         """
 
         Args:
@@ -114,7 +114,7 @@ class Client(object):
             response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
-    def set_token(self, token, office365=True):
+    def set_token(self, token, office365=False):
         """Sets the Token for its use in this library.
 
         Args:
@@ -463,6 +463,75 @@ class Client(object):
         url = "{0}me/contactFolders".format(self.base_url)
         return self._post(url, **kwargs)
 
+    @token_required
+    def drive_root_items(self, params=None):
+        return self._get('https://graph.microsoft.com/beta/me/drive/root', params=params)
+
+    @token_required
+    def drive_root_children_items(self, params=None):
+        return self._get('https://graph.microsoft.com/beta/me/drive/root/children', params=params)
+
+    @token_required
+    def drive_specific_folder(self, folder_id, params=None):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/children".format(folder_id)
+        return self._get(url, params=params)
+
+    @token_required
+    def drive_create_session(self, item_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/createSession".format(item_id)
+        return self._post(url, **kwargs)
+
+    @token_required
+    def drive_refresh_session(self, item_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/refreshSession".format(item_id)
+        return self._post(url, **kwargs)
+
+    @token_required
+    def drive_close_session(self, item_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/closeSession".format(item_id)
+        return self._post(url, **kwargs)
+
+    def excel_get_worksheets(self, item_id, params=None):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets".format(item_id)
+        return self._get(url, params=params)
+
+    def excel_get_names(self, item_id, params=None):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/names".format(item_id)
+        return self._get(url, params=params)
+
+    def excel_add_worksheet(self, item_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/add".format(item_id)
+        return self._post(url, **kwargs)
+
+    def excel_get_specific_worksheet(self, item_id, worksheet_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}".format(item_id, quote_plus(worksheet_id))
+        return self._get(url, **kwargs)
+
+    def excel_update_worksheet(self, item_id, worksheet_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}".format(item_id, quote_plus(worksheet_id))
+        return self._patch(url, **kwargs)
+
+    def excel_get_charts(self, item_id, worksheet_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/charts".format(item_id, quote_plus(worksheet_id))
+        return self._get(url, **kwargs)
+
+    def excel_add_chart(self, item_id, worksheet_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/charts/add".format(item_id, quote_plus(worksheet_id))
+        return self._post(url, **kwargs)
+
+    def excel_get_tables(self, item_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables".format(item_id)
+        return self._get(url, **kwargs)
+
+    def excel_add_table(self, item_id, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/add".format(item_id)
+        return self._post(url, **kwargs)
+
+    def excel_add_row(self, item_id, worksheets_id, table_id, **kwargs):
+        # url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/{1}/rows".format(item_id, quote_plus(table_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/rows".format(item_id, quote_plus(worksheets_id), quote_plus(table_id))
+        return self._post(url, **kwargs)
+
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
 
@@ -479,6 +548,9 @@ class Client(object):
         return self._request('DELETE', url, **kwargs)
 
     def _request(self, method, url, headers=None, **kwargs):
+        print("URL EN REQUEST")
+        print(url)
+
         _headers = {
             'Authorization': 'Bearer ' + self.token['access_token'],
             'Accept': 'application/json',
@@ -486,7 +558,10 @@ class Client(object):
         }
         if headers:
             _headers.update(headers)
-        return self._parse(requests.request(method, url, headers=_headers, **kwargs))
+        variable = requests.request(method, url, headers=_headers, **kwargs)
+        print(variable.url)
+        print(variable.request.headers)
+        return self._parse(variable)
 
     def _parse(self, response):
         status_code = response.status_code
