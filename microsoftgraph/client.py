@@ -275,6 +275,19 @@ class Client(object):
         return self._post(self.base_url + '/me/onenote/sections/{}/pages'.format(section_id), files=files)
 
     @token_required
+    def list_pages(self, params=None):
+        """Create a new page in the specified section.
+
+        Args:
+            params:
+
+        Returns:
+            A dict.
+
+        """
+        return self._get(self.base_url + '/me/onenote/pages', params=params)
+
+    @token_required
     def get_me_events(self):
         """Get a list of event objects in the user's mailbox. The list contains single instance meetings and
         series masters.
