@@ -481,12 +481,15 @@ class Client(object):
     def _delete(self, url, **kwargs):
         return self._request('DELETE', url, **kwargs)
 
-    def _request(self, method, url, headers=None, **kwargs):
+    def _request(self, method, url, headers=None, office365=False, **kwargs):
         _headers = {
-            'Authorization': 'Bearer ' + self.token['access_token'],
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
+        if office365:
+            _headers['Authorization'] = 'Bearer ' + self.office365_token['access_token']
+        else:
+            _headers['Authorization'] = 'Bearer ' + self.token['access_token']
         if headers:
             _headers.update(headers)
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
