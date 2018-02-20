@@ -551,9 +551,8 @@ class Client(object):
         return self._request('DELETE', url, **kwargs)
 
     def _request(self, method, url, headers=None, **kwargs):
-        print("URL EN REQUEST")
-        print(url)
-
+        # print("URL EN REQUEST")
+        # print(url)
         _headers = {
             'Authorization': 'Bearer ' + self.token['access_token'],
             'Accept': 'application/json',
@@ -562,8 +561,8 @@ class Client(object):
         if headers:
             _headers.update(headers)
         variable = requests.request(method, url, headers=_headers, **kwargs)
-        print(variable.url)
-        print(variable.request.headers)
+        # print(variable.url)
+        # print(variable.request.headers)
         return self._parse(variable)
 
     def _parse(self, response):
