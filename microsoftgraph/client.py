@@ -224,6 +224,7 @@ class Client(object):
         """
         return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
 
+    # Onenote
     @token_required
     def list_notebooks(self):
         """Retrieve a list of notebook objects.
@@ -287,6 +288,7 @@ class Client(object):
         """
         return self._get(self.base_url + '/me/onenote/pages', params=params)
 
+    # Calendar
     @token_required
     def get_me_events(self):
         """Get a list of event objects in the user's mailbox. The list contains single instance meetings and
@@ -408,6 +410,7 @@ class Client(object):
         """
         return self._get(self.base_url + 'me/calendars')
 
+    # Mail
     @token_required
     def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
         """Helper to send email from current user.
@@ -451,6 +454,7 @@ class Client(object):
         # Do a POST to Graph's sendMail API and return the response.
         return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
 
+    # Outlook
     @token_required
     def outlook_get_me_contacts(self, data_id=None, params=None):
         if data_id is None:
@@ -479,6 +483,7 @@ class Client(object):
         url = "{0}me/contactFolders".format(self.base_url)
         return self._post(url, **kwargs)
 
+    # Onedrive
     @token_required
     def drive_root_items(self, params=None):
         return self._get('https://graph.microsoft.com/beta/me/drive/root', params=params)
@@ -508,6 +513,7 @@ class Client(object):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/closeSession".format(item_id)
         return self._post(url, **kwargs)
 
+    # Excel
     @token_required
     def excel_get_worksheets(self, item_id, params=None, **kwargs):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets".format(item_id)
@@ -568,15 +574,15 @@ class Client(object):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/{1}/rows".format(item_id, table_id)
         return self._get(url, params=params, **kwargs)
 
-    @token_required
-    def excel_get_cell(self, item_id, worksheets_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/Cell(row='1', column='A')".format(item_id, quote_plus(worksheets_id))
-        return self._get(url, params=params, **kwargs)
+    # @token_required
+    # def excel_get_cell(self, item_id, worksheets_id, params=None, **kwargs):
+    #     url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/Cell(row='1', column='A')".format(item_id, quote_plus(worksheets_id))
+    #     return self._get(url, params=params, **kwargs)
 
-    @token_required
-    def excel_add_cell(self, item_id, worksheets_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/rows".format(item_id, worksheets_id)
-        return self._patch(url, **kwargs)
+    # @token_required
+    # def excel_add_cell(self, item_id, worksheets_id, **kwargs):
+    #     url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/rows".format(item_id, worksheets_id)
+    #     return self._patch(url, **kwargs)
 
     @token_required
     def excel_get_range(self, item_id, worksheets_id, **kwargs):
