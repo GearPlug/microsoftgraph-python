@@ -16,7 +16,7 @@ class Client(object):
     OFFICE365_AUTH_ENDPOINT = '/oauth20_authorize.srf?'
     OFFICE365_TOKEN_ENDPOINT = '/oauth20_token.srf'
 
-    def __init__(self, client_id, client_secret, api_version='v1.0', account_type='common'):
+    def __init__(self, client_id, client_secret, api_version='v1.0', account_type='common', office365=False):
         self.client_id = client_id
         self.client_secret = client_secret
         self.api_version = api_version
@@ -24,9 +24,10 @@ class Client(object):
 
         self.base_url = self.RESOURCE + self.api_version + '/'
         self.token = None
+        self.office365 = office365
         self.office365_token = None
 
-    def authorization_url(self, redirect_uri, scope, state=None, office365=False):
+    def authorization_url(self, redirect_uri, scope, state=None):
         """
 
         Args:
@@ -42,8 +43,6 @@ class Client(object):
             about the user's state in the app before the authentication request occurred, such as the page or view
             they were on.
 
-            office365: Get authorization url for office 365 instead graph.
-
         Returns:
             A string.
 
@@ -58,13 +57,13 @@ class Client(object):
 
         if state:
             params['state'] = None
-        if office365:
+        if self.office365:
             response = self.OFFICE365_AUTHORITY_URL + self.OFFICE365_AUTH_ENDPOINT + urlencode(params)
         else:
             response = self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(params)
         return response
 
-    def exchange_code(self, redirect_uri, code, office365=False):
+    def exchange_code(self, redirect_uri, code):
         """Exchanges a code for a Token.
 
         Args:
@@ -72,8 +71,6 @@ class Client(object):
             your app.  It must exactly match one of the redirect_uris you registered in the app registration portal
 
             code: The authorization_code that you acquired in the first leg of the flow.
-
-            office365: Exchange code for office 365 instead graph.
 
         Returns:
             A dict.
@@ -86,13 +83,13 @@ class Client(object):
             'code': code,
             'grant_type': 'authorization_code',
         }
-        if office365:
+        if self.office365:
             response = requests.post(self.OFFICE365_AUTHORITY_URL + self.OFFICE365_TOKEN_ENDPOINT, data=data)
         else:
             response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
-    def refresh_token(self, redirect_uri, refresh_token, office365=False):
+    def refresh_token(self, redirect_uri, refresh_token):
         """
 
         Args:
@@ -102,8 +99,6 @@ class Client(object):
             refresh_token: An OAuth 2.0 refresh token. Your app can use this token acquire additional access tokens
             after the current access token expires. Refresh tokens are long-lived, and can be used to retain access
             to resources for extended periods of time.
-
-            office365: Refresh token for office 365 instead graph.
 
         Returns:
             A dict.
@@ -116,22 +111,20 @@ class Client(object):
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token',
         }
-        if office365:
+        if self.office365:
             response = requests.post(self.OFFICE365_AUTHORITY_URL + self.OFFICE365_TOKEN_ENDPOINT, data=data)
         else:
             response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
-    def set_token(self, token, office365=False):
+    def set_token(self, token):
         """Sets the Token for its use in this library.
 
         Args:
             token: A string with the Token.
 
-            office365: Set token for office 365 instead graph.
-
         """
-        if office365:
+        if self.office365:
             self.office365_token = token
         else:
             self.token = token
@@ -563,12 +556,12 @@ class Client(object):
     def _delete(self, url, **kwargs):
         return self._request('DELETE', url, **kwargs)
 
-    def _request(self, method, url, headers=None, office365=False, **kwargs):
+    def _request(self, method, url, headers=None, **kwargs):
         _headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        if office365:
+        if self.office365:
             _headers['Authorization'] = 'Bearer ' + self.office365_token['access_token']
         else:
             _headers['Authorization'] = 'Bearer ' + self.token['access_token']
