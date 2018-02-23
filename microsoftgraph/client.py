@@ -605,7 +605,6 @@ class Client(object):
     def _request(self, method, url, headers=None, **kwargs):
         _headers = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
         }
         if self.office365:
             _headers['Authorization'] = 'Bearer ' + self.office365_token['access_token']
@@ -613,6 +612,10 @@ class Client(object):
             _headers['Authorization'] = 'Bearer ' + self.token['access_token']
         if headers:
             _headers.update(headers)
+        if 'files' not in kwargs:
+            # If you use the 'files' keyword, the library will set the Content-Type to multipart/form-data
+            # and will generate a boundary.
+            _headers['Content-Type'] = 'application/json'
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
