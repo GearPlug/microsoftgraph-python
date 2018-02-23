@@ -3,7 +3,7 @@ Microsoft graph API wrapper for Microsoft Graph written in Python.
 
 ## Installing
 ```
-git+git://github.com/GearPlug/microsoftgraph-python
+pip install microsoftgraph-python
 ```
 
 ## Usage
