@@ -263,9 +263,6 @@ update_range = client.excel_update_range(item_id, worksheets_id)
 
 ## Requirements
 - requests
-- base64
-- mimetypes
-- urllib.parse -- urlencode, --quote_plus
 
 ## Tests
 ```
