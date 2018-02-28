@@ -7,49 +7,36 @@ pip install microsoftgraph-python
 ```
 
 ## Usage
+If you need an office 365 token, send office365 attribute in True like this:
+```
+from microsoftgraph.client import Client
+client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='by defect common', office365=True)
+```
+
+If you don't, just instance the library like this:
 ```
 from microsoftgraph.client import Client
 client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='by defect common')
 ```
 
 #### Get authorization url
-for office 365
 ```
-url = client.authorization_url(redirect_uri, scope, state=None, office365=True)
-```
-for microsoft graph
-```
-url = client.authorization_url(redirect_uri, scope, state=None, office365=False)
+url = client.authorization_url(redirect_uri, scope, state=None)
 ```
 
 #### Exchange the code for an access token
-for office 365
 ```
-token = client.exchange_code(redirect_uri, code, office365=True)
-```
-for microsoft graph
-```
-token = client.exchange_code(redirect_uri, code, office365=False)
+token = client.exchange_code(redirect_uri, code)
 ```
 
 #### Refresh token
-for office 365
 ```
-token = client.refresh_token(redirect_uri, refresh_token, office365=True)
-```
-for microsoft graph
-```
-token = client.refresh_token(redirect_uri, refresh_token, office365=False)
+token = client.refresh_token(redirect_uri, refresh_token)
 ```
 
 #### Set token
-for office 365
 ```
-token = client.set_token(token, office365=True)
-```
-for microsoft graph
-```
-token = client.set_token(token, office365=False)
+token = client.set_token(token)
 ```
 
 #### Get me
