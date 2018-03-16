@@ -1,6 +1,7 @@
 import base64
 import mimetypes
 import requests
+import json
 from microsoftgraph import exceptions
 from microsoftgraph.decorators import token_required
 from urllib.parse import urlencode, urlparse, quote_plus
@@ -297,8 +298,7 @@ class Client(object):
 
     @token_required
     def create_calendar_event(self, subject, content, start_datetime, start_timezone, end_datetime, end_timezone,
-                              recurrence_type, recurrence_interval, recurrence_days_of_week, recurrence_range_type,
-                              recurrence_range_startdate, recurrence_range_enddate, location, attendees, calendar=None):
+                              location, calendar=None, **kwargs):
         """
         Create a new calendar event.
 
@@ -309,18 +309,6 @@ class Client(object):
             start_timezone: in the format of Pacific Standard Time, string
             end_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
             end_timezone: in the format of Pacific Standard Time, string
-            recurrence_type: daily, weekly, absoluteMonthly, relativeMonthly, absoluteYearly, relativeYearly
-            recurrence_interval: The number of units between occurrences, can be in days, weeks, months, or years,
-                                depending on the type. Required.
-            recurrence_days_of_week: sunday, monday, tuesday, wednesday, thursday, friday, saturday
-            recurrence_range_type: endDate, noEnd, numbered
-            recurrence_range_startdate: The date to start applying the recurrence pattern. The first occurrence of the
-                                        meeting may be this date or later, depending on the recurrence pattern of the
-                                        event. Must be the same value as the start property of the recurring event.
-                                        Required.
-            recurrence_range_enddate:   Required if type is endDate, The date to stop applying the recurrence pattern.
-                                        Depending on the recurrence pattern of the event, the last occurrence of the
-                                        meeting may not be this date.
             location:   string
             attendees: list of dicts of the form:
                         {"emailAddress": {"address": a['attendees_email'],"name": a['attendees_name']}
@@ -330,13 +318,14 @@ class Client(object):
             A dict.
 
         """
-        attendees_list = [{
-            "emailAddress": {
-                "address": a['attendees_email'],
-                "name": a['attendees_name']
-            },
-            "type": a['attendees_type']
-        } for a in attendees]
+        # TODO: attendees
+        # attendees_list = [{
+        #     "emailAddress": {
+        #         "address": a['attendees_email'],
+        #         "name": a['attendees_name']
+        #     },
+        #     "type": a['attendees_type']
+        # } for a in kwargs['attendees']]
         body = {
             "subject": subject,
             "body": {
@@ -351,22 +340,10 @@ class Client(object):
                 "dateTime": end_datetime,
                 "timeZone": end_timezone
             },
-            "recurrence": {
-                "pattern": {
-                    "type": recurrence_type,
-                    "interval": recurrence_interval,
-                    "daysOfWeek": recurrence_days_of_week
-                },
-                "range": {
-                    "type": recurrence_range_type,
-                    "startDate": recurrence_range_startdate,
-                    "endDate": recurrence_range_enddate
-                }
-            },
             "location": {
                 "displayName": location
             },
-            "attendees": attendees_list
+            # "attendees": attendees_list
         }
         url = 'me/calendars/{}/events'.format(calendar) if calendar is not None else 'me/events'
         return self._post(self.base_url + url, json=body)
