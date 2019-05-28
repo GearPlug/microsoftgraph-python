@@ -57,7 +57,7 @@ class Client(object):
         }
 
         if state:
-            params['state'] = None
+            params['state'] = state
         if self.office365:
             response = self.OFFICE365_AUTHORITY_URL + self.OFFICE365_AUTH_ENDPOINT + urlencode(params)
         else:
