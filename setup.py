@@ -7,10 +7,11 @@ def read(fname):
 
 
 setup(name='microsoftgraph-python',
-      version='0.1.5',
+      version='0.1.6',
       description='API wrapper for Microsoft Graph written in Python',
       long_description=read('README.md'),
       url='https://github.com/GearPlug/microsoftgraph-python',
+      long_description_content_type="text/markdown",
       author='Miguel Ferrer, Nerio Rincon, Yordy Gelvez',
       author_email='ingferrermiguel@gmail.com',
       license='GPL',
