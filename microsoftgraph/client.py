@@ -184,7 +184,7 @@ class Client(object):
             'expirationDateTime': expiration_datetime,
             'clientState': client_state
         }
-        return self._post('https://graph.microsoft.com/beta/' + 'subscriptions', json=data)
+        return self._post(self.base_url + 'subscriptions', json=data)
 
     @token_required
     def renew_subscription(self, subscription_id, expiration_datetime):
@@ -203,7 +203,7 @@ class Client(object):
         data = {
             'expirationDateTime': expiration_datetime
         }
-        return self._patch('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id), json=data)
+        return self._patch(self.base_url + 'subscriptions/{}'.format(subscription_id), json=data)
 
     @token_required
     def delete_subscription(self, subscription_id):
@@ -216,7 +216,7 @@ class Client(object):
             None.
 
         """
-        return self._delete('https://graph.microsoft.com/beta/' + 'subscriptions/{}'.format(subscription_id))
+        return self._delete(self.base_url + 'subscriptions/{}'.format(subscription_id))
 
     # Onenote
     @token_required
