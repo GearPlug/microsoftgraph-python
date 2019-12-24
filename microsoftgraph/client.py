@@ -8,12 +8,12 @@ from urllib.parse import urlencode, urlparse, quote_plus
 
 
 class Client(object):
-    AUTHORITY_URL = 'https://login.microsoftonline.com/'
+    AUTHORITY_URL = 'https://login.live.com'
     AUTH_ENDPOINT = '/oauth2/v2.0/authorize?'
     TOKEN_ENDPOINT = '/oauth2/v2.0/token'
     RESOURCE = 'https://graph.microsoft.com/'
 
-    OFFICE365_AUTHORITY_URL = 'https://login.live.com'
+    OFFICE365_AUTHORITY_URL = 'https://login.microsoftonline.com/'
     OFFICE365_AUTH_ENDPOINT = '/oauth20_authorize.srf?'
     OFFICE365_TOKEN_ENDPOINT = '/oauth20_token.srf'
 
