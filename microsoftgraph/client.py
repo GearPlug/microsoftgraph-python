@@ -483,6 +483,11 @@ class Client(object):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/closeSession".format(item_id)
         return self._post(url, **kwargs)
 
+    @token_required
+    def drive_download_contents(self, item_id, params=None, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(item_id)
+        return self._get(url, params=params, **kwargs)
+
     # Excel
     @token_required
     def excel_get_worksheets(self, item_id, params=None, **kwargs):
@@ -600,7 +605,7 @@ class Client(object):
         if 'application/json' in response.headers['Content-Type']:
             r = response.json()
         else:
-            r = response.text
+            r = response.content
         if status_code in (200, 201, 202):
             return r
         elif status_code == 204:
