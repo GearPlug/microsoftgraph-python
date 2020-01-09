@@ -488,6 +488,11 @@ class Client(object):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(item_id)
         return self._get(url, params=params, **kwargs)
 
+    @token_required
+    def drive_get_item(self, item_id, params=None, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}".format(item_id)
+        return self._get(url, params=params, **kwargs)
+
     # Excel
     @token_required
     def excel_get_worksheets(self, item_id, params=None, **kwargs):
