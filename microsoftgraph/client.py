@@ -493,6 +493,12 @@ class Client(object):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}".format(item_id)
         return self._get(url, params=params, **kwargs)
 
+    @token_required
+    def drive_upload_item(self, item_id, params=None, **kwargs):
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(item_id)
+        kwargs['headers'] = {'Content-Type': 'text/plain'}
+        return self._put(url, params=params, **kwargs)
+
     # Excel
     @token_required
     def excel_get_worksheets(self, item_id, params=None, **kwargs):
@@ -658,4 +664,9 @@ class Client(object):
         elif status_code == 509:
             raise exceptions.BandwidthLimitExceeded(r)
         else:
+            if r['error']['innerError']['code'] == 'lockMismatch':
+                # File is currently locked due to being open in the web browser
+                # while attempting to reupload a new version to the drive.
+                # Thus temporarily unavailable.
+                raise exceptions.ServiceUnavailable(r)
             raise exceptions.UnknownError(r)
