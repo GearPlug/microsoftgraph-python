@@ -183,6 +183,16 @@ refresh_session = client.drive_refresh_session(item_id)
 close_session = client.drive_close_session(item_id)
 ```
 
+#### Download the contents of a specific item
+```
+contents_bytes = client.drive_download_contents(item_id)
+```
+
+#### Get a Drive item resource
+```
+drive_item_dict = client.drive_get_item(item_id)
+```
+
 #### Get worksheets
 ```
 get_worksheets = client.excel_get_worksheets(item_id)
