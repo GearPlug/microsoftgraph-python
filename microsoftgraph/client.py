@@ -489,6 +489,11 @@ class Client(object):
         return self._get(url, params=params, **kwargs)
 
     @token_required
+    def drive_download_large_contents(self, downloadUrl, offset, size):
+        headers = {"Range": f'bytes={offset}-{size + offset - 1}'}
+        return self._get(downloadUrl, headers = headers)
+
+    @token_required
     def drive_get_item(self, item_id, params=None, **kwargs):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}".format(item_id)
         return self._get(url, params=params, **kwargs)
@@ -617,7 +622,7 @@ class Client(object):
             r = response.json()
         else:
             r = response.content
-        if status_code in (200, 201, 202):
+        if status_code in (200, 201, 202, 206):
             return r
         elif status_code == 204:
             return None
