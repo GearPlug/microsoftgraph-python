@@ -10,13 +10,13 @@ pip install microsoftgraph-python
 If you need an office 365 token, send office365 attribute in True like this:
 ```
 from microsoftgraph.client import Client
-client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='by defect common', office365=True)
+client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='common', office365=True) # by default common, thus account_type is optional parameter
 ```
 
 If you don't, just instance the library like this:
 ```
 from microsoftgraph.client import Client
-client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='by defect common')
+client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='common') # by default common, thus account_type is optional parameter
 ```
 
 #### Get authorization url
