@@ -1,13 +1,10 @@
 import base64
-import json
-import base64
 import mimetypes
-
 import requests
-from urllib.parse import urlencode, urlparse, quote_plus
-
+import json
 from microsoftgraph import exceptions
 from microsoftgraph.decorators import token_required
+from urllib.parse import urlencode, urlparse, quote_plus
 
 
 class Client(object):
@@ -20,12 +17,7 @@ class Client(object):
     OFFICE365_AUTH_ENDPOINT = '/oauth20_authorize.srf?'
     OFFICE365_TOKEN_ENDPOINT = '/oauth20_token.srf'
 
-    def __init__(self,
-                 client_id,
-                 client_secret,
-                 api_version='v1.0',
-                 account_type='common',
-                 office365=False):
+    def __init__(self, client_id, client_secret, api_version='v1.0', account_type='common', office365=False):
         self.client_id = client_id
         self.client_secret = client_secret
         self.api_version = api_version
@@ -67,28 +59,10 @@ class Client(object):
         if state:
             params['state'] = state
         if self.office365:
-            response = self.OFFICE365_AUTHORITY_URL + self.OFFICE365_AUTH_ENDPOINT + urlencode(
-                params)
+            response = self.OFFICE365_AUTHORITY_URL + self.OFFICE365_AUTH_ENDPOINT + urlencode(params)
         else:
-            response = self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(
-                params)
+            response = self.AUTHORITY_URL + self.account_type + self.AUTH_ENDPOINT + urlencode(params)
         return response
-
-    def get_access_token(
-            self,
-            tenant='common',
-            scope='https://graph.microsoft.com/.default',
-            grant_type='client_credentials',
-    ):
-        url = f'{self.AUTHORITY_URL}{tenant}/oauth2/v2.0/token'
-        body = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-            'scope': scope,
-            'grant_type': grant_type,
-        }
-        response = requests.post(url, data=body)
-        return self._parse(response)
 
     def exchange_code(self, redirect_uri, code):
         """Exchanges a code for a Token.
@@ -111,13 +85,9 @@ class Client(object):
             'grant_type': 'authorization_code',
         }
         if self.office365:
-            response = requests.post(self.OFFICE365_AUTHORITY_URL +
-                                     self.OFFICE365_TOKEN_ENDPOINT,
-                                     data=data)
+            response = requests.post(self.OFFICE365_AUTHORITY_URL + self.OFFICE365_TOKEN_ENDPOINT, data=data)
         else:
-            response = requests.post(self.AUTHORITY_URL + self.account_type +
-                                     self.TOKEN_ENDPOINT,
-                                     data=data)
+            response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
     def refresh_token(self, redirect_uri, refresh_token):
@@ -143,13 +113,9 @@ class Client(object):
             'grant_type': 'refresh_token',
         }
         if self.office365:
-            response = requests.post(self.OFFICE365_AUTHORITY_URL +
-                                     self.OFFICE365_TOKEN_ENDPOINT,
-                                     data=data)
+            response = requests.post(self.OFFICE365_AUTHORITY_URL + self.OFFICE365_TOKEN_ENDPOINT, data=data)
         else:
-            response = requests.post(self.AUTHORITY_URL + self.account_type +
-                                     self.TOKEN_ENDPOINT,
-                                     data=data)
+            response = requests.post(self.AUTHORITY_URL + self.account_type + self.TOKEN_ENDPOINT, data=data)
         return self._parse(response)
 
     def set_token(self, token):
@@ -193,16 +159,10 @@ class Client(object):
             A dict.
 
         """
-        return self._get(self.base_url + 'me/messages/' + message_id,
-                         params=params)
+        return self._get(self.base_url + 'me/messages/' + message_id, params=params)
 
     @token_required
-    def create_subscription(self,
-                            change_type,
-                            notification_url,
-                            resource,
-                            expiration_datetime,
-                            client_state=None):
+    def create_subscription(self, change_type, notification_url, resource, expiration_datetime, client_state=None):
         """Creating a subscription is the first step to start receiving notifications for a resource.
 
         Args:
@@ -240,10 +200,10 @@ class Client(object):
             A dict.
 
         """
-        data = {'expirationDateTime': expiration_datetime}
-        return self._patch(self.base_url +
-                           'subscriptions/{}'.format(subscription_id),
-                           json=data)
+        data = {
+            'expirationDateTime': expiration_datetime
+        }
+        return self._patch(self.base_url + 'subscriptions/{}'.format(subscription_id), json=data)
 
     @token_required
     def delete_subscription(self, subscription_id):
@@ -256,8 +216,7 @@ class Client(object):
             None.
 
         """
-        return self._delete(self.base_url +
-                            'subscriptions/{}'.format(subscription_id))
+        return self._delete(self.base_url + 'subscriptions/{}'.format(subscription_id))
 
     # Onenote
     @token_required
@@ -294,9 +253,7 @@ class Client(object):
             A dict.
 
         """
-        return self._get(
-            self.base_url +
-            'me/onenote/notebooks/{}/sections'.format(notebook_id))
+        return self._get(self.base_url + 'me/onenote/notebooks/{}/sections'.format(notebook_id))
 
     @token_required
     def create_page(self, section_id, files):
@@ -310,9 +267,7 @@ class Client(object):
             A dict.
 
         """
-        return self._post(self.base_url +
-                          '/me/onenote/sections/{}/pages'.format(section_id),
-                          files=files)
+        return self._post(self.base_url + '/me/onenote/sections/{}/pages'.format(section_id), files=files)
 
     @token_required
     def list_pages(self, params=None):
@@ -342,16 +297,8 @@ class Client(object):
         return self._get(self.base_url + 'me/events')
 
     @token_required
-    def create_calendar_event(self,
-                              subject,
-                              content,
-                              start_datetime,
-                              start_timezone,
-                              end_datetime,
-                              end_timezone,
-                              location,
-                              calendar=None,
-                              **kwargs):
+    def create_calendar_event(self, subject, content, start_datetime, start_timezone, end_datetime, end_timezone,
+                              location, calendar=None, **kwargs):
         """
         Create a new calendar event.
 
@@ -398,8 +345,7 @@ class Client(object):
             },
             # "attendees": attendees_list
         }
-        url = 'me/calendars/{}/events'.format(
-            calendar) if calendar is not None else 'me/events'
+        url = 'me/calendars/{}/events'.format(calendar) if calendar is not None else 'me/events'
         return self._post(self.base_url + url, json=body)
 
     @token_required
@@ -418,7 +364,9 @@ class Client(object):
             A dict.
 
         """
-        body = {'name': '{}'.format(name)}
+        body = {
+            'name': '{}'.format(name)
+        }
         return self._post(self.base_url + 'me/calendars', json=body)
 
     @token_required
@@ -434,12 +382,7 @@ class Client(object):
 
     # Mail
     @token_required
-    def send_mail(self,
-                  subject=None,
-                  recipients=None,
-                  body='',
-                  content_type='HTML',
-                  attachments=None):
+    def send_mail(self, subject=None, recipients=None, body='', content_type='HTML', attachments=None):
         """Helper to send email from current user.
 
         Args:
@@ -458,11 +401,7 @@ class Client(object):
             raise ValueError('sendmail(): required arguments missing')
 
         # Create recipient list in required format.
-        recipient_list = [{
-            'EmailAddress': {
-                'Address': address
-            }
-        } for address in recipients]
+        recipient_list = [{'EmailAddress': {'Address': address}} for address in recipients]
 
         # Create list of attachments in required format.
         attached_files = []
@@ -471,34 +410,19 @@ class Client(object):
                 b64_content = base64.b64encode(open(filename, 'rb').read())
                 mime_type = mimetypes.guess_type(filename)[0]
                 mime_type = mime_type if mime_type else ''
-                attached_files.append({
-                    '@odata.type':
-                    '#microsoft.graph.fileAttachment',
-                    'ContentBytes':
-                    b64_content.decode('utf-8'),
-                    'ContentType':
-                    mime_type,
-                    'Name':
-                    filename
-                })
+                attached_files.append(
+                    {'@odata.type': '#microsoft.graph.fileAttachment', 'ContentBytes': b64_content.decode('utf-8'),
+                     'ContentType': mime_type, 'Name': filename})
 
         # Create email message in required format.
-        email_msg = {
-            'Message': {
-                'Subject': subject,
-                'Body': {
-                    'ContentType': content_type,
-                    'Content': body
-                },
-                'ToRecipients': recipient_list,
-                'Attachments': attached_files
-            },
-            'SaveToSentItems': 'true'
-        }
+        email_msg = {'Message': {'Subject': subject,
+                                 'Body': {'ContentType': content_type, 'Content': body},
+                                 'ToRecipients': recipient_list,
+                                 'Attachments': attached_files},
+                     'SaveToSentItems': 'true'}
 
         # Do a POST to Graph's sendMail API and return the response.
-        return self._post(self.base_url + 'me/microsoft.graph.sendMail',
-                          json=email_msg)
+        return self._post(self.base_url + 'me/microsoft.graph.sendMail', json=email_msg)
 
     # Outlook
     @token_required
@@ -516,8 +440,7 @@ class Client(object):
 
     @token_required
     def outlook_create_contact_in_folder(self, folder_id, **kwargs):
-        url = "{0}/me/contactFolders/{1}/contacts".format(
-            self.base_url, folder_id)
+        url = "{0}/me/contactFolders/{1}/contacts".format(self.base_url, folder_id)
         return self._post(url, **kwargs)
 
     @token_required
@@ -533,44 +456,36 @@ class Client(object):
     # Onedrive
     @token_required
     def drive_root_items(self, params=None):
-        return self._get('https://graph.microsoft.com/beta/me/drive/root',
-                         params=params)
+        return self._get('https://graph.microsoft.com/beta/me/drive/root', params=params)
 
     @token_required
     def drive_root_children_items(self, params=None):
-        return self._get(
-            'https://graph.microsoft.com/beta/me/drive/root/children',
-            params=params)
+        return self._get('https://graph.microsoft.com/beta/me/drive/root/children', params=params)
 
     @token_required
     def drive_specific_folder(self, folder_id, params=None):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/children".format(
-            folder_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/children".format(folder_id)
         return self._get(url, params=params)
 
     @token_required
     def drive_create_session(self, item_id, **kwargs):
-        url = "https://graph.microsoft.com/v1.0/me/drive/items/{0}/workbook/createSession".format(
-            item_id)
+        url = "https://graph.microsoft.com/v1.0/me/drive/items/{0}/workbook/createSession".format(item_id)
         # url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/createSession".format(item_id)
         return self._post(url, **kwargs)
 
     @token_required
     def drive_refresh_session(self, item_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/refreshSession".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/refreshSession".format(item_id)
         return self._post(url, **kwargs)
 
     @token_required
     def drive_close_session(self, item_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/closeSession".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/closeSession".format(item_id)
         return self._post(url, **kwargs)
 
     @token_required
     def drive_download_contents(self, item_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(item_id)
         return self._get(url, params=params, **kwargs)
 
     def drive_download_shared_contents(self, share_id, params=None, **kwargs):
@@ -588,88 +503,74 @@ class Client(object):
 
     @token_required
     def drive_get_item(self, item_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}".format(item_id)
         return self._get(url, params=params, **kwargs)
 
     @token_required
     def drive_upload_item(self, item_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(item_id)
         kwargs['headers'] = {'Content-Type': 'text/plain'}
         return self._put(url, params=params, **kwargs)
 
     # Excel
     @token_required
     def excel_get_worksheets(self, item_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets".format(item_id)
         return self._get(url, params=params, **kwargs)
 
     @token_required
     def excel_get_names(self, item_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/names".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/names".format(item_id)
         return self._get(url, params=params, **kwargs)
 
     @token_required
     def excel_add_worksheet(self, item_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/add".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/add".format(item_id)
         return self._post(url, **kwargs)
 
     @token_required
     def excel_get_specific_worksheet(self, item_id, worksheet_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}".format(
-            item_id, quote_plus(worksheet_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}".format(item_id, quote_plus(worksheet_id))
         return self._get(url, **kwargs)
 
     @token_required
     def excel_update_worksheet(self, item_id, worksheet_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}".format(
-            item_id, quote_plus(worksheet_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}".format(item_id, quote_plus(worksheet_id))
         return self._patch(url, **kwargs)
 
     @token_required
     def excel_get_charts(self, item_id, worksheet_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/charts".format(
-            item_id, quote_plus(worksheet_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/charts".format(item_id, quote_plus(worksheet_id))
         return self._get(url, params=params, **kwargs)
 
     @token_required
     def excel_add_chart(self, item_id, worksheet_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/charts/add".format(
-            item_id, quote_plus(worksheet_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/charts/add".format(item_id, quote_plus(worksheet_id))
         return self._post(url, **kwargs)
 
     @token_required
     def excel_get_tables(self, item_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables".format(item_id)
         return self._get(url, params=params, **kwargs)
 
     @token_required
     def excel_add_table(self, item_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/add".format(
-            item_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/add".format(item_id)
         return self._post(url, **kwargs)
 
     @token_required
     def excel_add_column(self, item_id, worksheets_id, table_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/columns".format(
-            item_id, quote_plus(worksheets_id), table_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/columns".format(item_id, quote_plus(worksheets_id), table_id)
         return self._post(url, **kwargs)
 
     @token_required
     def excel_add_row(self, item_id, worksheets_id, table_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/rows".format(
-            item_id, quote_plus(worksheets_id), table_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/rows".format(item_id, quote_plus(worksheets_id), table_id)
         return self._post(url, **kwargs)
 
     @token_required
     def excel_get_rows(self, item_id, table_id, params=None, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/{1}/rows".format(
-            item_id, table_id)
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/tables/{1}/rows".format(item_id, table_id)
         return self._get(url, params=params, **kwargs)
 
     # @token_required
@@ -684,14 +585,12 @@ class Client(object):
 
     @token_required
     def excel_get_range(self, item_id, worksheets_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/range(address='A1:B2')".format(
-            item_id, quote_plus(worksheets_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/range(address='A1:B2')".format(item_id, quote_plus(worksheets_id))
         return self._get(url, **kwargs)
 
     @token_required
     def excel_update_range(self, item_id, worksheets_id, **kwargs):
-        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/range(address='A1:B2')".format(
-            item_id, quote_plus(worksheets_id))
+        url = "https://graph.microsoft.com/beta/me/drive/items/{0}/workbook/worksheets/{1}/range(address='A1:B2')".format(item_id, quote_plus(worksheets_id))
         return self._patch(url, **kwargs)
 
     def _get(self, url, **kwargs):
@@ -714,8 +613,7 @@ class Client(object):
             'Accept': 'application/json',
         }
         if self.office365:
-            _headers['Authorization'] = 'Bearer ' + self.office365_token[
-                'access_token']
+            _headers['Authorization'] = 'Bearer ' + self.office365_token['access_token']
         else:
             _headers['Authorization'] = 'Bearer ' + self.token['access_token']
         if headers:
@@ -724,8 +622,7 @@ class Client(object):
             # If you use the 'files' keyword, the library will set the Content-Type to multipart/form-data
             # and will generate a boundary.
             _headers['Content-Type'] = 'application/json'
-        return self._parse(
-            requests.request(method, url, headers=_headers, **kwargs))
+        return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
         status_code = response.status_code
