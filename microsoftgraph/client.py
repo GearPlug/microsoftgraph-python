@@ -618,7 +618,7 @@ class Client(object):
 
     def _parse(self, response):
         status_code = response.status_code
-        if 'application/json' in response.headers['Content-Type']:
+        if 'application/json' in response.headers.get('Content-Type', ''):
             r = response.json()
         else:
             r = response.content
