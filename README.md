@@ -6,14 +6,16 @@ Microsoft graph API wrapper for Microsoft Graph written in Python.
 pip install microsoftgraph-python
 ```
 
-## Usage
-If you need an office 365 token, send office365 attribute in True like this:
-```
-from microsoftgraph.client import Client
-client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='common', office365=True) # by default common, thus account_type is optional parameter
-```
+## Before start
+To use Microsoft Graph to read and write resources on behalf of a user, your app must get an access token from
+the Microsoft identity platform and attach the token to requests that it sends to Microsoft Graph. The exact
+authentication flow that you will use to get access tokens will depend on the kind of app you are developing and
+whether you want to use OpenID Connect to sign the user in to your app. One common flow used by native and mobile
+apps and also by some Web apps is the OAuth 2.0 authorization code grant flow.
 
-If you don't, just instance the library like this:
+See https://docs.microsoft.com/en-us/graph/auth-v2-user
+
+## Usage
 ```
 from microsoftgraph.client import Client
 client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='common') # by default common, thus account_type is optional parameter
