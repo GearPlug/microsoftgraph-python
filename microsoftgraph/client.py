@@ -488,6 +488,19 @@ class Client(object):
         url = "https://graph.microsoft.com/beta/me/drive/items/{0}/content".format(item_id)
         return self._get(url, params=params, **kwargs)
 
+    def drive_download_shared_contents(self, share_id, params=None, **kwargs):
+        base64_value = base64.b64encode(share_id.encode()).decode()
+        encoded_share_url = (
+            'u!' +
+            base64_value.rstrip('=').replace('/', '_').replace('+', '-')
+        )
+        url = "https://graph.microsoft.com/beta/shares/{0}/driveItem".format(
+            encoded_share_url
+        )
+        drive_item = self._get(url)
+        file_download_url = drive_item['@microsoft.graph.downloadUrl']
+        return drive_item['name'], requests.get(file_download_url).content
+
     @token_required
     def drive_download_large_contents(self, downloadUrl, offset, size):
         headers = {"Range": f'bytes={offset}-{size + offset - 1}'}
