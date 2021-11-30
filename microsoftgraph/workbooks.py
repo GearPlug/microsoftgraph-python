@@ -16,7 +16,7 @@ class Workbooks(object):
         self._client = client
 
     @token_required
-    def drive_create_session(self, workbook_id: str, **kwargs) -> Response:
+    def create_session(self, workbook_id: str, **kwargs) -> Response:
         """Create a new workbook session.
 
         https://docs.microsoft.com/en-us/graph/api/workbook-createsession?view=graph-rest-1.0&tabs=http
@@ -31,7 +31,7 @@ class Workbooks(object):
         return self._client._post(url, **kwargs)
 
     @token_required
-    def drive_refresh_session(self, workbook_id: str, **kwargs) -> Response:
+    def refresh_session(self, workbook_id: str, **kwargs) -> Response:
         """Refresh an existing workbook session.
 
         https://docs.microsoft.com/en-us/graph/api/workbook-refreshsession?view=graph-rest-1.0&tabs=http
@@ -46,7 +46,7 @@ class Workbooks(object):
         return self._client._post(url, **kwargs)
 
     @token_required
-    def drive_close_session(self, workbook_id: str, **kwargs) -> Response:
+    def close_session(self, workbook_id: str, **kwargs) -> Response:
         """Close an existing workbook session.
 
         https://docs.microsoft.com/en-us/graph/api/workbook-closesession?view=graph-rest-1.0&tabs=http
