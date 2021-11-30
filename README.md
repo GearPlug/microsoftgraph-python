@@ -11,14 +11,15 @@ apps and also by some Web apps is the OAuth 2.0 authorization code grant flow.
 See https://docs.microsoft.com/en-us/graph/auth-v2-user
 
 ## Breaking changes if you're upgrading prior 1.0.0
-- Adds API structure to library for e.g. `client.get_me()` => `client.users.get_me()`.
-- Renames several methods to match API documentation for e.g. `client.get_me_events()` => `client.calendar.list_events()`.
-- Result from calling methods are not longer a dict but a Response obj. To access the dict response as before then call `.data` property for e.g `r = client.users.get_me()` then `r.data`.
-
+- Added API structure to library for e.g. `client.get_me()` => `client.users.get_me()`.
+- Renamed several methods to match API documentation for e.g. `client.get_me_events()` => `client.calendar.list_events()`.
+- Result from calling a method is not longer a dictionary but a Response object. To access the dict response as before then call `.data` property for e.g `r = client.users.get_me()` then `r.data`.
+- Previous API calls made through beta endpoints are now pointing to v1.0 by default. This can be changed to beta if needed with the parameter `api_version` in the client instantiation.
 ## New in 1.0.0
-- You can access to [Requests library's Response obj](https://docs.python-requests.org/en/latest/) for e.g. `r = client.users.get_me()` then `r.original` or the response handled by the library `r.data`.
+- You can access to [Requests library's Response Object](https://docs.python-requests.org/en/latest/user/advanced/#request-and-response-objects) for e.g. `r = client.users.get_me()` then `r.original` or the response handled by the library `r.data`.
 - New Response properties `r.status_code` and `r.throttling`.
-- Better docstrings and type hinting.
+- You can pass [Requests library's Event Hooks](https://docs.python-requests.org/en/latest/user/advanced/#event-hooks) with the parameter `requests_hooks` in the client instantiation. If you are using Django and want to log in database every request made through this library, see [django-requests-logger](https://github.com/GearPlug/django-requests-logger).
+- Better method docstrings and type hinting.
 - Better library structure.
 ## Installing
 ```
@@ -39,12 +40,12 @@ url = client.authorization_url(redirect_uri, scope, state=None)
 
 #### Exchange the code for an access token
 ```
-token = client.exchange_code(redirect_uri, code)
+response = client.exchange_code(redirect_uri, code)
 ```
 
 #### Refresh token
 ```
-token = client.refresh_token(redirect_uri, refresh_token)
+response = client.refresh_token(redirect_uri, refresh_token)
 ```
 
 #### Set token
@@ -176,82 +177,82 @@ response = client.files.drive_download_contents(item_id)
 ### Workbooks
 #### Create session for specific item
 ```
-response = client.workbooks.create_session(item_id)
+response = client.workbooks.create_session(workbook_id)
 ```
 
 #### Refresh session for specific item
 ```
-response = client.workbooks.refresh_session(item_id)
+response = client.workbooks.refresh_session(workbook_id)
 ```
 
 #### Close session for specific item
 ```
-response = client.workbooks.close_session(item_id)
+response = client.workbooks.close_session(workbook_id)
 ```
 
 #### Get worksheets
 ```
-response = client.workbooks.list_worksheets(item_id)
+response = client.workbooks.list_worksheets(workbook_id)
 ```
 
 #### Get specific worksheet
 ```
-response = client.workbooks.get_worksheet(item_id, worksheet_id)
+response = client.workbooks.get_worksheet(workbook_id, worksheet_id)
 ```
 
 #### Add worksheets
 ```
-response = client.workbooks.add_worksheet(item_id)
+response = client.workbooks.add_worksheet(workbook_id)
 ```
 
 #### Update worksheet
 ```
-response = client.workbooks.update_worksheet(item_id, worksheet_id)
+response = client.workbooks.update_worksheet(workbook_id, worksheet_id)
 ```
 
 #### Get charts
 ```
-response = client.workbooks.list_charts(item_id, worksheet_id)
+response = client.workbooks.list_charts(workbook_id, worksheet_id)
 ```
 
 #### Add chart
 ```
-response = client.workbooks.add_chart(item_id, worksheet_id)
+response = client.workbooks.add_chart(workbook_id, worksheet_id)
 ```
 
 #### Get tables
 ```
-response = client.workbooks.list_tables(item_id)
+response = client.workbooks.list_tables(workbook_id)
 ```
 
 #### Add table
 ```
-response = client.workbooks.add_table(item_id)
+response = client.workbooks.add_table(workbook_id)
 ```
 
 #### Add column to table
 ```
-response = client.workbooks.create_column(item_id, worksheets_id, table_id)
+response = client.workbooks.create_column(workbook_id, worksheet_id, table_id)
 ```
 
 #### Add row to table
 ```
-response = client.workbooks.create_row(item_id, worksheets_id, table_id)
+response = client.workbooks.create_row(workbook_id, worksheet_id, table_id)
 ```
 
 #### Get table rows
 ```
-response = client.workbooks.list_rows(item_id, table_id)
+response = client.workbooks.list_rows(workbook_id, table_id)
 ```
 
 #### Get range
 ```
-response = client.workbooks.get_range(item_id, worksheets_id)
+response = client.workbooks.get_range(workbook_id, worksheet_id)
 ```
 
 #### Update range
 ```
-response = client.workbooks.update_range(item_id, worksheets_id)
+response = client.workbooks.update_range(workbook_id, worksheet_id)
 ```
 
 ### Webhooks
