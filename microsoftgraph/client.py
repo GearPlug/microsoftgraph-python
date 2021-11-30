@@ -4,14 +4,14 @@ import requests
 
 from microsoftgraph import exceptions
 from microsoftgraph.calendar import Calendar
-from microsoftgraph.excel import Excel
+from microsoftgraph.contacts import Contacts
+from microsoftgraph.files import Files
 from microsoftgraph.mail import Mail
-from microsoftgraph.onedrive import Onedrive
-from microsoftgraph.onenote import Onenote
-from microsoftgraph.outlook import Outlook
+from microsoftgraph.notes import Notes
 from microsoftgraph.response import Response
-from microsoftgraph.users import User
+from microsoftgraph.users import Users
 from microsoftgraph.webhooks import Webhooks
+from microsoftgraph.workbooks import Workbooks
 
 
 class Client(object):
@@ -21,8 +21,25 @@ class Client(object):
     RESOURCE = "https://graph.microsoft.com/"
 
     def __init__(
-        self, client_id: str, client_secret: str, api_version: str = "v1.0", account_type: str = "common"
+        self,
+        client_id: str,
+        client_secret: str,
+        api_version: str = "v1.0",
+        account_type: str = "common",
+        requests_hooks: dict = None,
     ) -> None:
+        """Instantiates library.
+
+        Args:
+            client_id (str): Application client id.
+            client_secret (str): Application client secret.
+            api_version (str, optional): v1.0 or beta. Defaults to "v1.0".
+            account_type (str, optional): common, organizations or consumers. Defaults to "common".
+            requests_hooks (dict, optional): Requests library event hooks. Defaults to None.
+
+        Raises:
+            Exception: requests_hooks is not a dict.
+        """
         self.client_id = client_id
         self.client_secret = client_secret
         self.api_version = api_version
@@ -32,13 +49,19 @@ class Client(object):
         self.token = None
 
         self.calendar = Calendar(self)
-        self.excel = Excel(self)
+        self.contacts = Contacts(self)
+        self.files = Files(self)
         self.mail = Mail(self)
-        self.onedrive = Onedrive(self)
-        self.onenote = Onenote(self)
-        self.outlook = Outlook(self)
-        self.user = User(self)
+        self.notes = Notes(self)
+        self.users = Users(self)
         self.webhooks = Webhooks(self)
+        self.workbooks = Workbooks(self)
+
+        if requests_hooks and not isinstance(requests_hooks, dict):
+            raise Exception(
+                'requests_hooks must be a dict. e.g. {"response": func}. http://docs.python-requests.org/en/master/user/advanced/#event-hooks'
+            )
+        self.requests_hooks = requests_hooks
 
     def authorization_url(self, redirect_uri: str, scope: list, state: str = None) -> str:
         """Generates an Authorization URL.
@@ -163,6 +186,8 @@ class Client(object):
         _headers["Authorization"] = "Bearer " + self.token["access_token"]
         if headers:
             _headers.update(headers)
+        if self.requests_hooks:
+            kwargs.update({"hooks": self.requests_hooks})
         if "files" not in kwargs:
             # If you use the 'files' keyword, the library will set the Content-Type to multipart/form-data
             # and will generate a boundary.

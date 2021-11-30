@@ -1,101 +1,112 @@
 from microsoftgraph.decorators import token_required
 from microsoftgraph.response import Response
+from datetime import datetime
 
 
 class Calendar(object):
-    def __init__(self, client):
+    def __init__(self, client) -> None:
+        """Working with Outlook Calendar.
+
+        https://docs.microsoft.com/en-us/graph/api/resources/calendar?view=graph-rest-1.0
+
+        Args:
+            client (Client): Library Client.
+        """
         self._client = client
 
     @token_required
-    def get_me_events(self) -> Response:
-        """Get a list of event objects in the user's mailbox. The list contains single instance meetings and
-        series masters.
+    def list_events(self) -> Response:
+        """Get a list of event objects in the user's mailbox. The list contains single instance meetings and series
+        masters.
 
-        Currently, this operation returns event bodies in only HTML format.
+        https://docs.microsoft.com/en-us/graph/api/user-list-events?view=graph-rest-1.0&tabs=http
 
         Returns:
-            A dict.
-
+            Response: Microsoft Graph Response.
         """
         return self._client._get(self._client.base_url + "me/events")
 
     @token_required
-    def create_calendar_event(
+    def create_event(
         self,
         subject: str,
         content: str,
-        start_datetime: str,
+        start_datetime: datetime,
         start_timezone: str,
-        end_datetime: str,
+        end_datetime: datetime,
         end_timezone: str,
         location: str,
         calendar: str = None,
+        content_type: str = "HTML",
         **kwargs,
     ) -> Response:
-        """
-        Create a new calendar event.
+        """Create an event in the user's default calendar or specified calendar.
+
+        https://docs.microsoft.com/en-us/graph/api/user-post-events?view=graph-rest-1.0&tabs=http
+
+        Additional time zones: https://docs.microsoft.com/en-us/graph/api/resources/datetimetimezone?view=graph-rest-1.0
 
         Args:
-            subject: subject of event, string
-            content: content of event, string
-            start_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
-            start_timezone: in the format of Pacific Standard Time, string
-            end_datetime: in the format of 2017-09-04T11:00:00, dateTimeTimeZone string
-            end_timezone: in the format of Pacific Standard Time, string
-            location:   string
-            attendees: list of dicts of the form:
-                        {"emailAddress": {"address": a['attendees_email'],"name": a['attendees_name']}
-            calendar:
+            subject (str): The text of the event's subject line.
+            content (str): The body of the message associated with the event.
+            start_datetime (datetime): A single point of time in a combined date and time representation ({date}T{time};
+            start_timezone (datetime): Represents a time zone, for example, "Pacific Standard Time".
+            end_datetime (str): A single point of time in a combined date and time representation ({date}T{time}; for
+            end_timezone (str): Represents a time zone, for example, "Pacific Standard Time".
+            location (str): The location of the event.
+            calendar (str, optional): Calendar ID. Defaults to None.
+            content_type (str, optional): It can be in HTML or text format. Defaults to HTML.
 
         Returns:
-            A dict.
-
+            Response: Microsoft Graph Response.
         """
-        # TODO: attendees
-        # attendees_list = [{
-        #     "emailAddress": {
-        #         "address": a['attendees_email'],
-        #         "name": a['attendees_name']
-        #     },
-        #     "type": a['attendees_type']
-        # } for a in kwargs['attendees']]
+        if isinstance(start_datetime, datetime):
+            start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        if isinstance(end_datetime, datetime):
+            start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+
         body = {
             "subject": subject,
-            "body": {"contentType": "HTML", "content": content},
-            "start": {"dateTime": start_datetime, "timeZone": start_timezone},
-            "end": {"dateTime": end_datetime, "timeZone": end_timezone},
+            "body": {
+                "contentType": content_type,
+                "content": content,
+            },
+            "start": {
+                "dateTime": start_datetime,
+                "timeZone": start_timezone,
+            },
+            "end": {
+                "dateTime": end_datetime,
+                "timeZone": end_timezone,
+            },
             "location": {"displayName": location},
-            # "attendees": attendees_list
         }
         url = "me/calendars/{}/events".format(calendar) if calendar is not None else "me/events"
         return self._client._post(self._client.base_url + url, json=body)
 
     @token_required
-    def create_calendar(self, name: str) -> Response:
-        """Create an event in the user's default calendar or specified calendar.
+    def list_calendars(self) -> Response:
+        """Get all the user's calendars (/calendars navigation property), get the calendars from the default calendar
+        group or from a specific calendar group.
 
-        You can specify the time zone for each of the start and end times of the event as part of these values,
-        as the  start and end properties are of dateTimeTimeZone type.
-
-        When an event is sent, the server sends invitations to all the attendees.
-
-        Args:
-            name:
+        https://docs.microsoft.com/en-us/graph/api/user-list-calendars?view=graph-rest-1.0&tabs=http
 
         Returns:
-            A dict.
+            Response: Microsoft Graph Response.
+        """
+        return self._client._get(self._client.base_url + "me/calendars")
 
+    @token_required
+    def create_calendar(self, name: str) -> Response:
+        """Create a new calendar for a user.
+
+        https://docs.microsoft.com/en-us/graph/api/user-post-calendars?view=graph-rest-1.0&tabs=http
+
+        Args:
+            name (str): The calendar name.
+
+        Returns:
+            Response: Microsoft Graph Response.
         """
         body = {"name": "{}".format(name)}
         return self._client._post(self._client.base_url + "me/calendars", json=body)
-
-    @token_required
-    def get_me_calendars(self) -> Response:
-        """Get all the user's calendars (/calendars navigation property), get the calendars from the default
-        calendar group or from a specific calendar group.
-
-        Returns:
-            A dict.
-
-        """
-        return self._client._get(self._client.base_url + "me/calendars")

@@ -3,7 +3,14 @@ from microsoftgraph.response import Response
 
 
 class Webhooks(object):
-    def __init__(self, client):
+    def __init__(self, client) -> None:
+        """Set up notifications for changes in user data.
+
+        https://docs.microsoft.com/en-us/graph/webhooks?view=graph-rest-1.0
+
+        Args:
+            client (Client): Library Client.
+        """
         self._client = client
 
     @token_required
@@ -62,7 +69,7 @@ class Webhooks(object):
         https://docs.microsoft.com/en-us/graph/webhooks#deleting-a-subscription
 
         Args:
-            subscription_id (str): Response ID.
+            subscription_id (str): Subscription ID.
 
         Returns:
             Response: Microsoft Graph Response.

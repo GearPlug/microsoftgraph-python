@@ -2,8 +2,15 @@ from microsoftgraph.decorators import token_required
 from microsoftgraph.response import Response
 
 
-class User(object):
-    def __init__(self, client):
+class Users(object):
+    def __init__(self, client) -> None:
+        """Working with users in Microsoft Graph.
+
+        https://docs.microsoft.com/en-us/graph/api/resources/users?view=graph-rest-1.0
+
+        Args:
+            client (Client): Library Client.
+        """
         self._client = client
 
     @token_required
