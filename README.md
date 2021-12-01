@@ -1,4 +1,4 @@
-# microsoft-python
+# microsoftgraph-python
 Microsoft graph API wrapper for Microsoft Graph written in Python.
 
 ## Before start
@@ -8,13 +8,14 @@ authentication flow that you will use to get access tokens will depend on the ki
 whether you want to use OpenID Connect to sign the user in to your app. One common flow used by native and mobile
 apps and also by some Web apps is the OAuth 2.0 authorization code grant flow.
 
-See https://docs.microsoft.com/en-us/graph/auth-v2-user
+See [Get access on behalf of a user](https://docs.microsoft.com/en-us/graph/auth-v2-user)
 
 ## Breaking changes if you're upgrading prior 1.0.0
-- Added API structure to library for e.g. `client.get_me()` => `client.users.get_me()`.
+- Added structure to library to match API documentation for e.g. `client.get_me()` => `client.users.get_me()`.
 - Renamed several methods to match API documentation for e.g. `client.get_me_events()` => `client.calendar.list_events()`.
 - Result from calling a method is not longer a dictionary but a Response object. To access the dict response as before then call `.data` property for e.g `r = client.users.get_me()` then `r.data`.
 - Previous API calls made through beta endpoints are now pointing to v1.0 by default. This can be changed to beta if needed with the parameter `api_version` in the client instantiation.
+- Removed Office 365 endpoints as they were merged with the Microsoft Graph API. See [Office 365 APIs](https://docs.microsoft.com/en-us/previous-versions/office/office-365-api/).
 ## New in 1.0.0
 - You can access to [Requests library's Response Object](https://docs.python-requests.org/en/latest/user/advanced/#request-and-response-objects) for e.g. `r = client.users.get_me()` then `r.original` or the response handled by the library `r.data`.
 - New Response properties `r.status_code` and `r.throttling`.
@@ -26,7 +27,7 @@ See https://docs.microsoft.com/en-us/graph/auth-v2-user
 pip install microsoftgraph-python
 ```
 ## Usage
-### Instantiation
+### Client instantiation
 ```
 from microsoftgraph.client import Client
 client = Client('CLIENT_ID', 'CLIENT_SECRET', account_type='common') # by default common, thus account_type is optional parameter.
