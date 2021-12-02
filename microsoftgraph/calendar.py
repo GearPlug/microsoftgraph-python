@@ -68,8 +68,8 @@ class Calendar(object):
             subject (str): The text of the event's subject line.
             content (str): The body of the message associated with the event.
             start_datetime (datetime): A single point of time in a combined date and time representation ({date}T{time};
-            start_timezone (datetime): Represents a time zone, for example, "Pacific Standard Time".
-            end_datetime (str): A single point of time in a combined date and time representation ({date}T{time}; for
+            start_timezone (str): Represents a time zone, for example, "Pacific Standard Time".
+            end_datetime (datetime): A single point of time in a combined date and time representation ({date}T{time}; for
             end_timezone (str): Represents a time zone, for example, "Pacific Standard Time".
             location (str): The location of the event.
             calendar_id (str, optional): Calendar ID. Defaults to None.
@@ -81,7 +81,7 @@ class Calendar(object):
         if isinstance(start_datetime, datetime):
             start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
         if isinstance(end_datetime, datetime):
-            start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+            end_datetime = end_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
         body = {
             "subject": subject,
