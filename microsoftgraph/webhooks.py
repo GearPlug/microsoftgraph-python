@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from microsoftgraph.decorators import token_required
 from microsoftgraph.response import Response
+from microsoftgraph.utils import format_time
 
 
 class Webhooks(object):
@@ -19,7 +22,7 @@ class Webhooks(object):
         change_type: str,
         notification_url: str,
         resource: str,
-        expiration_datetime: str,
+        expiration_datetime: datetime,
         client_state: str = None,
     ) -> Response:
         """Creates a subscription to start receiving notifications for a resource.
@@ -31,12 +34,15 @@ class Webhooks(object):
             updated on marking a message read.
             notification_url (str): Url to receive notifications.
             resource (str): The URI of the resource relative to https://graph.microsoft.com.
-            expiration_datetime (str): The expiration time for the subscription.
+            expiration_datetime (datetime): The expiration time for the subscription.
             client_state (str, optional): The clientState property specified in the subscription request. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
+        if isinstance(expiration_datetime, datetime):
+            expiration_datetime = format_time(expiration_datetime, is_webhook=True)
+
         data = {
             "changeType": change_type,
             "notificationUrl": notification_url,
@@ -47,18 +53,21 @@ class Webhooks(object):
         return self._client._post(self._client.base_url + "subscriptions", json=data)
 
     @token_required
-    def renew_subscription(self, subscription_id: str, expiration_datetime: str) -> Response:
+    def renew_subscription(self, subscription_id: str, expiration_datetime: datetime) -> Response:
         """Renews a subscription to keep receiving notifications for a resource.
 
         https://docs.microsoft.com/en-us/graph/webhooks#renewing-a-subscription
 
         Args:
             subscription_id (str): Subscription ID.
-            expiration_datetime (str): Expiration date.
+            expiration_datetime (datetime): Expiration date.
 
         Returns:
             Response: Microsoft Graph Response.
         """
+        if isinstance(expiration_datetime, datetime):
+            expiration_datetime = expiration_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+
         data = {"expirationDateTime": expiration_datetime}
         return self._client._patch(self._client.base_url + "subscriptions/{}".format(subscription_id), json=data)
 

@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from microsoftgraph.decorators import token_required
 from microsoftgraph.response import Response
-from datetime import datetime
+from microsoftgraph.utils import format_time
 
 
 class Calendar(object):
@@ -79,9 +81,9 @@ class Calendar(object):
             Response: Microsoft Graph Response.
         """
         if isinstance(start_datetime, datetime):
-            start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+            start_datetime = format_time(start_datetime)
         if isinstance(end_datetime, datetime):
-            end_datetime = end_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+            end_datetime = format_time(end_datetime)
 
         body = {
             "subject": subject,
