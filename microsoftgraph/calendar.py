@@ -15,16 +15,34 @@ class Calendar(object):
         self._client = client
 
     @token_required
-    def list_events(self) -> Response:
+    def list_events(self, calendar_id: str = None) -> Response:
         """Get a list of event objects in the user's mailbox. The list contains single instance meetings and series
         masters.
 
         https://docs.microsoft.com/en-us/graph/api/user-list-events?view=graph-rest-1.0&tabs=http
 
+        Args:
+            calendar_id (str): Calendar ID.
+
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._get(self._client.base_url + "me/events")
+        url = "me/calendars/{}/events".format(calendar_id) if calendar_id else "me/events"
+        return self._client._get(self._client.base_url + url)
+
+    @token_required
+    def get_event(self, event_id: str) -> Response:
+        """Get the properties and relationships of the specified event object.
+
+        https://docs.microsoft.com/en-us/graph/api/event-get?view=graph-rest-1.0&tabs=http
+
+        Args:
+            event_id (str): Event ID.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        return self._client._get(self._client.base_url + "me/events/{}".format(event_id))
 
     @token_required
     def create_event(
@@ -36,7 +54,7 @@ class Calendar(object):
         end_datetime: datetime,
         end_timezone: str,
         location: str,
-        calendar: str = None,
+        calendar_id: str = None,
         content_type: str = "HTML",
         **kwargs,
     ) -> Response:
@@ -54,7 +72,7 @@ class Calendar(object):
             end_datetime (str): A single point of time in a combined date and time representation ({date}T{time}; for
             end_timezone (str): Represents a time zone, for example, "Pacific Standard Time".
             location (str): The location of the event.
-            calendar (str, optional): Calendar ID. Defaults to None.
+            calendar_id (str, optional): Calendar ID. Defaults to None.
             content_type (str, optional): It can be in HTML or text format. Defaults to HTML.
 
         Returns:
@@ -81,7 +99,7 @@ class Calendar(object):
             },
             "location": {"displayName": location},
         }
-        url = "me/calendars/{}/events".format(calendar) if calendar is not None else "me/events"
+        url = "me/calendars/{}/events".format(calendar_id) if calendar_id is not None else "me/events"
         return self._client._post(self._client.base_url + url, json=body)
 
     @token_required

@@ -100,7 +100,12 @@ response = client.notes.create_page(section_id, files)
 ### Calendar
 #### Get events
 ```
-response = client.calendar.list_events()
+response = client.calendar.list_events(calendar_id)
+```
+
+#### Get event
+```
+response = client.calendar.get_event(event_id)
 ```
 
 #### Create calendar event
