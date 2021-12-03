@@ -5,6 +5,9 @@ class Response:
     def __init__(self, original) -> None:
         self.original = original
 
+    def __repr__(self) -> str:
+        return "<Response [{}] ({})>".format(self.status_code, self.data)
+
     @property
     def data(self):
         if "application/json" in self.original.headers.get("Content-Type", ""):
