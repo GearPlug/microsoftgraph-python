@@ -66,7 +66,7 @@ class Webhooks(object):
             Response: Microsoft Graph Response.
         """
         if isinstance(expiration_datetime, datetime):
-            expiration_datetime = expiration_datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")
+            expiration_datetime = format_time(expiration_datetime, is_webhook=True)
 
         data = {"expirationDateTime": expiration_datetime}
         return self._client._patch(self._client.base_url + "subscriptions/{}".format(subscription_id), json=data)

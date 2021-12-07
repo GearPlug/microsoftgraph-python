@@ -101,6 +101,7 @@ class Calendar(object):
             },
             "location": {"displayName": location},
         }
+        body.update(kwargs)
         url = "me/calendars/{}/events".format(calendar_id) if calendar_id is not None else "me/events"
         return self._client._post(self._client.base_url + url, json=body)
 

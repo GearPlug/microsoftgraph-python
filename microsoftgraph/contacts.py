@@ -1,3 +1,4 @@
+import json
 from microsoftgraph.decorators import token_required
 from microsoftgraph.response import Response
 
@@ -26,8 +27,7 @@ class Contacts(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = "{0}me/contacts/{1}".format(self._client.base_url, contact_id)
-        return self._client._get(url, params=params)
+        return self._client._get(self._client.base_url + "me/contacts/{}".format(contact_id), params=params)
 
     @token_required
     def list_contacts(self, params: dict = None) -> Response:
@@ -41,35 +41,47 @@ class Contacts(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = "{0}me/contacts".format(self._client.base_url)
-        return self._client._get(url, params=params)
+        return self._client._get(self._client.base_url + "me/contacts", params=params)
 
     @token_required
-    def create_contact(self, **kwargs) -> Response:
-        """Add a contact to the root Contacts folder.
-
-        https://docs.microsoft.com/en-us/graph/api/user-post-contacts?view=graph-rest-1.0&tabs=http
-
-        Returns:
-            Response: Microsoft Graph Response.
-        """
-        url = "{0}me/contacts".format(self._client.base_url)
-        return self._client._post(url, **kwargs)
-
-    @token_required
-    def create_contact_in_folder(self, folder_id: str, **kwargs) -> Response:
-        """Add a contact to another contact folder.
+    def create_contact(
+        self,
+        given_name: str,
+        surname: str,
+        email_addresses: list,
+        business_phones: list,
+        folder_id: str = None,
+        **kwargs
+    ) -> Response:
+        """Add a contact to the root Contacts folder or to the contacts endpoint of another contact folder.
 
         https://docs.microsoft.com/en-us/graph/api/user-post-contacts?view=graph-rest-1.0&tabs=http
 
         Args:
-            folder_id (str): Unique identifier of the contact folder.
+            given_name (str): The contact's given name.
+            surname (str): The contact's surname.
+            email_addresses (list): The contact's email addresses.
+            business_phones (list): The contact's business phone numbers.
+            folder_id (str, optional): Unique identifier of the contact folder. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = "{0}me/contactFolders/{1}/contacts".format(self._client.base_url, folder_id)
-        return self._client._post(url, **kwargs)
+        if isinstance(email_addresses, str):
+            email_addresses = [{"address": email_addresses, "name": "{} {}".format(given_name, surname)}]
+
+        if isinstance(business_phones, str):
+            business_phones = [business_phones]
+
+        body = {
+            "givenName": given_name,
+            "surname": surname,
+            "emailAddresses": email_addresses,
+            "businessPhones": business_phones,
+        }
+        body.update(kwargs)
+        url = "me/contactFolders/{}/contacts".format(folder_id) if folder_id else "me/contacts"
+        return self._client._post(self._client.base_url + url, json=body)
 
     @token_required
     def list_contact_folders(self, params: dict = None) -> Response:
@@ -83,8 +95,7 @@ class Contacts(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = "{0}me/contactFolders".format(self._client.base_url)
-        return self._client._get(url, params=params)
+        return self._client._get(self._client.base_url + "me/contactFolders", params=params)
 
     @token_required
     def create_contact_folder(self, **kwargs) -> Response:
@@ -95,5 +106,4 @@ class Contacts(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = "{0}me/contactFolders".format(self._client.base_url)
-        return self._client._post(url, **kwargs)
+        return self._client._post(self._client.base_url + "me/contactFolders", **kwargs)

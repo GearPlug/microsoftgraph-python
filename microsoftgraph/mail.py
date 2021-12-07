@@ -41,6 +41,7 @@ class Mail(object):
         content_type: str = "HTML",
         attachments: list = None,
         save_to_sent_items: bool = True,
+        **kwargs,
     ) -> Response:
         """Send the message specified in the request body using either JSON or MIME format.
 
@@ -59,11 +60,21 @@ class Mail(object):
             Response: Microsoft Graph Response.
         """
         # Create recipient list in required format.
-        to_recipient_list = [{"EmailAddress": {"Address": address}} for address in to_recipients]
+        if isinstance(to_recipients, list):
+            if all([isinstance(e, str) for e in to_recipients]):
+                to_recipients = [{"EmailAddress": {"Address": address}} for address in to_recipients]
+        elif isinstance(to_recipients, str):
+            to_recipients = [{"EmailAddress": {"Address": to_recipients}}]
+        else:
+            raise Exception("to_recipients value is invalid.")
 
-        cc_recipient_list = []
-        if cc_recipients:
-            cc_recipient_list = [{"EmailAddress": {"Address": address}} for address in cc_recipients]
+        if cc_recipients and isinstance(cc_recipients, list):
+            if all([isinstance(e, str) for e in cc_recipients]):
+                cc_recipients = [{"EmailAddress": {"Address": address}} for address in cc_recipients]
+        elif cc_recipients and isinstance(cc_recipients, str):
+            cc_recipients = [{"EmailAddress": {"Address": cc_recipients}}]
+        else:
+            cc_recipients = []
 
         # Create list of attachments in required format.
         attached_files = []
@@ -86,12 +97,13 @@ class Mail(object):
             "Message": {
                 "Subject": subject,
                 "Body": {"ContentType": content_type, "Content": content},
-                "ToRecipients": to_recipient_list,
-                "ccRecipients": cc_recipient_list,
+                "ToRecipients": to_recipients,
+                "ccRecipients": cc_recipients,
                 "Attachments": attached_files,
             },
             "SaveToSentItems": save_to_sent_items,
         }
+        email_msg.update(kwargs)
 
         # Do a POST to Graph's sendMail API and return the response.
         return self._client._post(self._client.base_url + "me/sendMail", json=email_msg)

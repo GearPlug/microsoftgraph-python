@@ -68,7 +68,15 @@ response = client.mail.get_message(message_id)
 
 #### Send mail
 ```
-response = client.mail.send_mail(subject, content, to_recipients)
+data = {
+    subject="Meet for lunch?",
+    content="The new cafeteria is open.",
+    content_type="text",
+    to_recipients=["fannyd@contoso.onmicrosoft.com"],
+    cc_recipients=None,
+    save_to_sent_items=True,
+}
+response = client.mail.send_mail(**data)
 ```
 
 ### Notes
@@ -110,7 +118,24 @@ response = client.calendar.get_event(event_id)
 
 #### Create calendar event
 ```
-response = client.calendar.create_event(subject, content, start_datetime,start_timezone, end_datetime, end_timezone, location, calendar, content_type)
+from datetime import datetime, timedelta
+
+start_datetime = datetime.now() + timedelta(days=1) # tomorrow
+end_datetime = datetime.now() + timedelta(days=1, hours=1) # tomorrow + one hour
+timezone = "America/Bogota"
+
+data = {
+    "calendar_id": "CALENDAR_ID",
+    "subject": "Let's go for lunch",
+    "content": "Does noon work for you?",
+    "content_type": "text",
+    "start_datetime": start_datetime,
+    "start_timezone": timezone,
+    "end_datetime": end_datetime,
+    "end_timezone": timezone,
+    "location": "Harry's Bar",
+}
+response = client.calendar.create_event(**data)
 ```
 
 #### Get calendars
@@ -136,12 +161,21 @@ response = client.contacts.list_contacts()
 
 #### Create contact
 ```
-response = client.contacts.create_contact()
-```
-
-#### Create contact in specific folder
-```
-response = client.contacts.create_contact_in_folder(folder_id)
+data = {
+    "given_name": "Pavel",
+    "surname": "Bansky",
+    "email_addresses": [
+        {
+            "address": "pavelb@fabrikam.onmicrosoft.com",
+            "name": "Pavel Bansky"
+        }
+    ],
+    "business_phones": [
+        "+1 732 555 0102"
+    ],
+    "folder_id": None,
+}
+response = client.contacts.create_contact(**data)
 ```
 
 #### Get contact folders
