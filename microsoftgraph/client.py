@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
 
 import requests
-import copy
+
 from microsoftgraph import exceptions
 from microsoftgraph.calendar import Calendar
 from microsoftgraph.contacts import Contacts

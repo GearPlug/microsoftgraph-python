@@ -20,6 +20,7 @@ See [Get access on behalf of a user](https://docs.microsoft.com/en-us/graph/auth
 - You can access to [Requests library's Response Object](https://docs.python-requests.org/en/latest/user/advanced/#request-and-response-objects) for e.g. `r = client.users.get_me()` then `r.original` or the response handled by the library `r.data`.
 - New Response properties `r.status_code` and `r.throttling`.
 - You can pass [Requests library's Event Hooks](https://docs.python-requests.org/en/latest/user/advanced/#event-hooks) with the parameter `requests_hooks` in the client instantiation. If you are using Django and want to log in database every request made through this library, see [django-requests-logger](https://github.com/GearPlug/django-requests-logger).
+- Library can auto paginate responses. Set `paginate` parameter in client initialization. Defaults to `True`.
 - Better method docstrings and type hinting.
 - Better library structure.
 ## Installing
@@ -61,6 +62,11 @@ response = client.users.get_me()
 ```
 
 ### Mail
+
+#### List messages
+```
+response = client.mail.list_messages()
+```
 #### Get message
 ```
 response = client.mail.get_message(message_id)
@@ -77,6 +83,16 @@ data = {
     save_to_sent_items=True,
 }
 response = client.mail.send_mail(**data)
+```
+
+#### List mail folders
+```
+response = client.mail.list_mail_folders()
+```
+
+#### Create mail folder
+```
+response = client.mail.create_mail_folder(display_name)
 ```
 
 ### Notes

@@ -83,6 +83,5 @@ class Notes(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._post(
-            self._client.base_url + "me/onenote/sections/{}/pages".format(section_id), files=files
-        )
+        url = "me/onenote/sections/{}/pages".format(section_id)
+        return self._client._post(self._client.base_url + url, files=files)

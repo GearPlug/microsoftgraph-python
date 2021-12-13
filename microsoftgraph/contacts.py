@@ -99,12 +99,18 @@ class Contacts(object):
         return self._client._get(self._client.base_url + "me/contactFolders", params=params)
 
     @token_required
-    def create_contact_folder(self, **kwargs) -> Response:
+    def create_contact_folder(self, display_name: str, parent_folder_id: str, **kwargs) -> Response:
         """Create a new contactFolder under the user's default contacts folder.
 
         https://docs.microsoft.com/en-us/graph/api/user-post-contactfolders?view=graph-rest-1.0&tabs=http
 
+        Args:
+            display_name (str): The folder's display name.
+            parent_folder_id (str): The ID of the folder's parent folder.
+
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._post(self._client.base_url + "me/contactFolders", **kwargs)
+        data = {"displayName": display_name, "parentFolderId": parent_folder_id}
+        data.update(kwargs)
+        return self._client._post(self._client.base_url + "me/contactFolders", json=data)
