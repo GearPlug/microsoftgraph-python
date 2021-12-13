@@ -17,7 +17,7 @@ class Calendar(object):
         self._client = client
 
     @token_required
-    def list_events(self, calendar_id: str = None) -> Response:
+    def list_events(self, calendar_id: str = None, params: dict = None) -> Response:
         """Get a list of event objects in the user's mailbox. The list contains single instance meetings and series
         masters.
 
@@ -25,26 +25,28 @@ class Calendar(object):
 
         Args:
             calendar_id (str): Calendar ID.
+            params (dict, optional): Query. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
         url = "me/calendars/{}/events".format(calendar_id) if calendar_id else "me/events"
-        return self._client._get(self._client.base_url + url)
+        return self._client._get(self._client.base_url + url, params=params)
 
     @token_required
-    def get_event(self, event_id: str) -> Response:
+    def get_event(self, event_id: str, params: dict = None) -> Response:
         """Get the properties and relationships of the specified event object.
 
         https://docs.microsoft.com/en-us/graph/api/event-get?view=graph-rest-1.0&tabs=http
 
         Args:
             event_id (str): Event ID.
+            params (dict, optional): Query. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._get(self._client.base_url + "me/events/{}".format(event_id))
+        return self._client._get(self._client.base_url + "me/events/{}".format(event_id), params=params)
 
     @token_required
     def create_event(
@@ -106,16 +108,19 @@ class Calendar(object):
         return self._client._post(self._client.base_url + url, json=body)
 
     @token_required
-    def list_calendars(self) -> Response:
+    def list_calendars(self, params: dict = None) -> Response:
         """Get all the user's calendars (/calendars navigation property), get the calendars from the default calendar
         group or from a specific calendar group.
 
         https://docs.microsoft.com/en-us/graph/api/user-list-calendars?view=graph-rest-1.0&tabs=http
 
+        Args:
+            params (dict, optional): Query. Defaults to None.
+
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._get(self._client.base_url + "me/calendars")
+        return self._client._get(self._client.base_url + "me/calendars", params=params)
 
     @token_required
     def create_calendar(self, name: str) -> Response:

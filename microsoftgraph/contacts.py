@@ -1,4 +1,3 @@
-import json
 from microsoftgraph.decorators import token_required
 from microsoftgraph.response import Response
 
@@ -30,18 +29,20 @@ class Contacts(object):
         return self._client._get(self._client.base_url + "me/contacts/{}".format(contact_id), params=params)
 
     @token_required
-    def list_contacts(self, params: dict = None) -> Response:
+    def list_contacts(self, folder_id: str = None, params: dict = None) -> Response:
         """Get a contact collection from the default contacts folder of the signed-in user.
 
         https://docs.microsoft.com/en-us/graph/api/user-list-contacts?view=graph-rest-1.0&tabs=http
 
         Args:
+            folder_id (str): Folder ID.
             params (dict, optional): Query. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._get(self._client.base_url + "me/contacts", params=params)
+        url = "me/contactfolders/{}/contacts".format(folder_id) if folder_id else "me/contacts"
+        return self._client._get(self._client.base_url + url, params=params)
 
     @token_required
     def create_contact(

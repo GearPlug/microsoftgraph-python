@@ -17,6 +17,22 @@ class Mail(object):
         self._client = client
 
     @token_required
+    def list_messages(self, folder_id: str = None, params: dict = None) -> Response:
+        """Get the messages in the signed-in user's mailbox (including the Deleted Items and Clutter folders).
+
+        https://docs.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0&tabs=http
+
+        Args:
+            folder_id (str, optional): Mail Folder ID.
+            params (dict, optional): Query. Defaults to None.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        url = "me/mailFolders/{id}/messages".format(folder_id) if folder_id else "me/messages"
+        return self._client._get(self._client.base_url + url, params=params)
+
+    @token_required
     def get_message(self, message_id: str, params: dict = None) -> Response:
         """Retrieve the properties and relationships of a message object.
 
@@ -107,3 +123,40 @@ class Mail(object):
 
         # Do a POST to Graph's sendMail API and return the response.
         return self._client._post(self._client.base_url + "me/sendMail", json=email_msg)
+
+    @token_required
+    def list_mail_folders(self, params: dict = None) -> Response:
+        """Get the mail folder collection directly under the root folder of the signed-in user. The returned collection
+        includes any mail search folders directly under the root.
+
+        By default, this operation does not return hidden folders. Use a query parameter includeHiddenFolders to include
+        them in the response.
+
+        https://docs.microsoft.com/en-us/graph/api/user-list-mailfolders?view=graph-rest-1.0&tabs=http
+
+        Args:
+            params (dict, optional): Query. Defaults to None.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        return self._client._get(self._client.base_url + "me/mailFolders", params=params)
+
+    @token_required
+    def create_mail_folder(self, display_name: str, is_hidden: bool = False) -> Response:
+        """Use this API to create a new mail folder in the root folder of the user's mailbox.
+
+        https://docs.microsoft.com/en-us/graph/api/user-post-mailfolders?view=graph-rest-1.0&tabs=http
+
+        Args:
+            display_name (str): Query.
+            is_hidden (bool, optional): Is the folder hidden. Defaults to False.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        data = {
+            "displayName": display_name,
+            "isHidden": is_hidden,
+        }
+        return self._client._post(self._client.base_url + "me/mailFolders", json=data)

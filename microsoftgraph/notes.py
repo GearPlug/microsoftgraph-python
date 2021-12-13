@@ -5,7 +5,7 @@ from microsoftgraph.response import Response
 class Notes(object):
     def __init__(self, client) -> None:
         """Use the OneNote REST API.
-        
+
         https://docs.microsoft.com/en-us/graph/api/resources/onenote-api-overview?view=graph-rest-1.0
 
         Args:
@@ -28,32 +28,35 @@ class Notes(object):
         return self._client._get(self._client.base_url + "me/onenote/notebooks", params=params)
 
     @token_required
-    def get_notebook(self, notebook_id: str) -> Response:
+    def get_notebook(self, notebook_id: str, params: dict = None) -> Response:
         """Retrieve the properties and relationships of a notebook object.
 
         https://docs.microsoft.com/en-us/graph/api/notebook-get?view=graph-rest-1.0&tabs=http
 
         Args:
             notebook_id (str): The unique identifier of the notebook.
+            params (dict, optional): Query. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._get(self._client.base_url + "me/onenote/notebooks/" + notebook_id)
+        return self._client._get(self._client.base_url + "me/onenote/notebooks/" + notebook_id, params=params)
 
     @token_required
-    def list_sections(self, notebook_id: str) -> Response:
+    def list_sections(self, notebook_id: str, params: dict = None) -> Response:
         """Retrieve a list of onenoteSection objects from the specified notebook.
 
         https://docs.microsoft.com/en-us/graph/api/notebook-list-sections?view=graph-rest-1.0&tabs=http
 
         Args:
             notebook_id (str): The unique identifier of the notebook.
+            params (dict, optional): Query. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        return self._client._get(self._client.base_url + "me/onenote/notebooks/{}/sections".format(notebook_id))
+        url = "me/onenote/notebooks/{}/sections".format(notebook_id)
+        return self._client._get(self._client.base_url + url, params=params)
 
     @token_required
     def list_pages(self, params: dict = None) -> Response:

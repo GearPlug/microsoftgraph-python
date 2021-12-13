@@ -13,7 +13,7 @@ See [Get access on behalf of a user](https://docs.microsoft.com/en-us/graph/auth
 ## Breaking changes if you're upgrading prior 1.0.0
 - Added structure to library to match API documentation for e.g. `client.get_me()` => `client.users.get_me()`.
 - Renamed several methods to match API documentation for e.g. `client.get_me_events()` => `client.calendar.list_events()`.
-- Result from calling a method is not longer a dictionary but a Response object. To access the dict response as before then call `.data` property for e.g `r = client.users.get_me()` then `r.data`.
+- Result from calling a method is not longer a dictionary but a Response object. To access the dict response as before then call `.data` attribute for e.g `r = client.users.get_me()` then `r.data`.
 - Previous API calls made through beta endpoints are now pointing to v1.0 by default. This can be changed to beta if needed with the parameter `api_version` in the client instantiation.
 - Removed Office 365 endpoints as they were merged with the Microsoft Graph API. See [Office 365 APIs](https://docs.microsoft.com/en-us/previous-versions/office/office-365-api/).
 ## New in 1.0.0

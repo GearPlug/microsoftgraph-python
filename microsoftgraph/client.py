@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
 
 import requests
-
+import copy
 from microsoftgraph import exceptions
 from microsoftgraph.calendar import Calendar
 from microsoftgraph.contacts import Contacts
@@ -27,6 +27,7 @@ class Client(object):
         api_version: str = "v1.0",
         account_type: str = "common",
         requests_hooks: dict = None,
+        paginate: bool = True,
     ) -> None:
         """Instantiates library.
 
@@ -47,6 +48,7 @@ class Client(object):
 
         self.base_url = self.RESOURCE + self.api_version + "/"
         self.token = None
+        self.paginate = paginate
 
         self.calendar = Calendar(self)
         self.contacts = Contacts(self)
@@ -164,8 +166,30 @@ class Client(object):
         """
         self.token = token
 
+    def _paginate_response(self, response: dict, **kwargs) -> dict:
+        """Some queries against Microsoft Graph return multiple pages of data either due to server-side paging or due to
+        the use of the $top query parameter to specifically limit the page size in a request. When a result set spans
+        multiple pages, Microsoft Graph returns an @odata.nextLink property in the response that contains a URL to the
+        next page of results.
+
+        https://docs.microsoft.com/en-us/graph/paging?context=graph%2Fapi%2F1.0&view=graph-rest-1.0
+
+        Args:
+            response (dict): Graph API Response.
+
+        Returns:
+            dict: Graph API Response.
+        """
+        if not self.paginate:
+            return response
+        while "@odata.nextLink" in response.data:
+            data = response.data["value"]
+            response = self._get(response.data["@odata.nextLink"], **kwargs)
+            response.data["value"] += data
+        return response
+
     def _get(self, url, **kwargs):
-        return self._request("GET", url, **kwargs)
+        return self._paginate_response(self._request("GET", url, **kwargs), **kwargs)
 
     def _post(self, url, **kwargs):
         return self._request("POST", url, **kwargs)
