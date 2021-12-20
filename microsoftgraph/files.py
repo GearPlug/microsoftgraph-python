@@ -58,8 +58,8 @@ class Files(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/children".format(folder_id)
-        return self._client._get(url, params=params)
+        url = "me/drive/items/{}/children".format(folder_id)
+        return self._client._get(self._client.base_url + url, params=params)
 
     @token_required
     def drive_get_item(self, item_id: str, params: dict = None, **kwargs) -> Response:
@@ -75,8 +75,8 @@ class Files(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}".format(item_id)
-        return self._client._get(url, params=params, **kwargs)
+        url = "me/drive/items/{}".format(item_id)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
     def drive_download_contents(self, item_id: str, params: dict = None, **kwargs) -> Response:
@@ -92,8 +92,8 @@ class Files(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/content".format(item_id)
-        return self._client._get(url, params=params, **kwargs)
+        url = "me/drive/items/{}/content".format(item_id)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
     def drive_download_shared_contents(self, share_id: str, params: dict = None, **kwargs) -> Response:
@@ -111,7 +111,7 @@ class Files(object):
         """
         base64_value = base64.b64encode(share_id.encode()).decode()
         encoded_share_url = "u!" + base64_value.rstrip("=").replace("/", "_").replace("+", "-")
-        url = self._client.base_url + "shares/{0}/driveItem".format(encoded_share_url)
+        url = self._client.base_url + "shares/{}/driveItem".format(encoded_share_url)
         drive_item = self._client._get(url)
         file_download_url = drive_item["@microsoft.graph.downloadUrl"]
         return drive_item["name"], requests.get(file_download_url).content
@@ -148,6 +148,24 @@ class Files(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/content".format(item_id)
         kwargs["headers"] = {"Content-Type": "text/plain"}
-        return self._client._put(url, params=params, **kwargs)
+        url = "me/drive/items/{}/content".format(item_id)
+        return self._client._put(self._client.base_url + url, params=params, **kwargs)
+
+    @token_required
+    def search_items(self, q: str, params: dict = None, **kwargs) -> Response:
+        """Search the hierarchy of items for items matching a query. You can search within a folder hierarchy, a whole
+        drive, or files shared with the current user.
+
+        https://docs.microsoft.com/en-us/graph/api/driveitem-search?view=graph-rest-1.0&tabs=http
+
+        Args:
+            q (str): The query text used to search for items. Values may be matched across several fields including
+            filename, metadata, and file content.
+            params (dict, optional): Query. Defaults to None.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        url = "me/drive/root/search(q='{}')".format(q)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)

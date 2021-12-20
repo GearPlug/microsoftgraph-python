@@ -1,6 +1,6 @@
 from urllib.parse import quote_plus
 
-from microsoftgraph.decorators import token_required
+from microsoftgraph.decorators import token_required, workbook_session_id_required
 from microsoftgraph.response import Response
 
 
@@ -27,10 +27,11 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/createSession".format(workbook_id)
-        return self._client._post(url, **kwargs)
+        url = "me/drive/items/{}/workbook/createSession".format(workbook_id)
+        return self._client._post(self._client.base_url + url, **kwargs)
 
     @token_required
+    @workbook_session_id_required
     def refresh_session(self, workbook_id: str, **kwargs) -> Response:
         """Refresh an existing workbook session.
 
@@ -42,10 +43,12 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/refreshSession".format(workbook_id)
-        return self._client._post(url, **kwargs)
+        headers = {"workbook-session-id": self._client.workbook_session_id}
+        url = "me/drive/items/{}/workbook/refreshSession".format(workbook_id)
+        return self._client._post(self._client.base_url + url, headers=headers, **kwargs)
 
     @token_required
+    @workbook_session_id_required
     def close_session(self, workbook_id: str, **kwargs) -> Response:
         """Close an existing workbook session.
 
@@ -57,24 +60,9 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/closeSession".format(workbook_id)
-        return self._client._post(url, **kwargs)
-
-    @token_required
-    def list_worksheets(self, workbook_id: str, params: dict = None, **kwargs) -> Response:
-        """Retrieve a list of worksheet objects.
-
-        https://docs.microsoft.com/en-us/graph/api/workbook-list-worksheets?view=graph-rest-1.0&tabs=http
-
-        Args:
-            workbook_id (str):  Excel file ID.
-            params (dict, optional): Query. Defaults to None.
-
-        Returns:
-            Response: Microsoft Graph Response.
-        """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets".format(workbook_id)
-        return self._client._get(url, params=params, **kwargs)
+        headers = {"workbook-session-id": self._client.workbook_session_id}
+        url = "me/drive/items/{}/workbook/closeSession".format(workbook_id)
+        return self._client._post(self._client.base_url + url, headers=headers, **kwargs)
 
     @token_required
     def list_names(self, workbook_id: str, params: dict = None, **kwargs) -> Response:
@@ -89,23 +77,24 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/names".format(workbook_id)
-        return self._client._get(url, params=params, **kwargs)
+        url = "me/drive/items/{}/workbook/names".format(workbook_id)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
-    def add_worksheet(self, workbook_id: str, **kwargs) -> Response:
-        """Adds a new worksheet to the workbook.
+    def list_worksheets(self, workbook_id: str, params: dict = None, **kwargs) -> Response:
+        """Retrieve a list of worksheet objects.
 
-        https://docs.microsoft.com/en-us/graph/api/worksheetcollection-add?view=graph-rest-1.0&tabs=http
+        https://docs.microsoft.com/en-us/graph/api/workbook-list-worksheets?view=graph-rest-1.0&tabs=http
 
         Args:
-            workbook_id (str): Excel file ID.
+            workbook_id (str):  Excel file ID.
+            params (dict, optional): Query. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/add".format(workbook_id)
-        return self._client._post(url, **kwargs)
+        url = "me/drive/items/{}/workbook/worksheets".format(workbook_id)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
     def get_worksheet(self, workbook_id: str, worksheet_id: str, **kwargs) -> Response:
@@ -120,10 +109,23 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}".format(
-            workbook_id, quote_plus(worksheet_id)
-        )
-        return self._client._get(url, **kwargs)
+        url = "me/drive/items/{}/workbook/worksheets/{}".format(workbook_id, quote_plus(worksheet_id))
+        return self._client._get(self._client.base_url + url, **kwargs)
+
+    @token_required
+    def add_worksheet(self, workbook_id: str, **kwargs) -> Response:
+        """Adds a new worksheet to the workbook.
+
+        https://docs.microsoft.com/en-us/graph/api/worksheetcollection-add?view=graph-rest-1.0&tabs=http
+
+        Args:
+            workbook_id (str): Excel file ID.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        url = "me/drive/items/{}/workbook/worksheets/add".format(workbook_id)
+        return self._client._post(self._client.base_url + url, **kwargs)
 
     @token_required
     def update_worksheet(self, workbook_id: str, worksheet_id: str, **kwargs) -> Response:
@@ -138,10 +140,8 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}".format(
-            workbook_id, quote_plus(worksheet_id)
-        )
-        return self._client._patch(url, **kwargs)
+        url = "me/drive/items/{}/workbook/worksheets/{}".format(workbook_id, quote_plus(worksheet_id))
+        return self._client._patch(self._client.base_url + url, **kwargs)
 
     @token_required
     def list_charts(self, workbook_id: str, worksheet_id: str, params: dict = None, **kwargs) -> Response:
@@ -157,10 +157,8 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/charts".format(
-            workbook_id, quote_plus(worksheet_id)
-        )
-        return self._client._get(url, params=params, **kwargs)
+        url = "me/drive/items/{}/workbook/worksheets/{}/charts".format(workbook_id, quote_plus(worksheet_id))
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
     def add_chart(self, workbook_id: str, worksheet_id: str, **kwargs) -> Response:
@@ -175,10 +173,8 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/charts/add".format(
-            workbook_id, quote_plus(worksheet_id)
-        )
-        return self._client._post(url, **kwargs)
+        url = "me/drive/items/{}/workbook/worksheets/{}/charts/add".format(workbook_id, quote_plus(worksheet_id))
+        return self._client._post(self._client.base_url + url, **kwargs)
 
     @token_required
     def list_tables(self, workbook_id: str, params: dict = None, **kwargs) -> Response:
@@ -193,8 +189,8 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/tables".format(workbook_id)
-        return self._client._get(url, params=params, **kwargs)
+        url = "me/drive/items/{}/workbook/tables".format(workbook_id)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
     def add_table(self, workbook_id: str, **kwargs) -> Response:
@@ -208,11 +204,11 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/tables/add".format(workbook_id)
-        return self._client._post(url, **kwargs)
+        url = "me/drive/items/{}/workbook/tables/add".format(workbook_id)
+        return self._client._post(self._client.base_url + url, **kwargs)
 
     @token_required
-    def create_column(self, workbook_id: str, worksheet_id: str, table_id: str, **kwargs) -> Response:
+    def create_table_column(self, workbook_id: str, worksheet_id: str, table_id: str, **kwargs) -> Response:
         """Create a new TableColumn.
 
         https://docs.microsoft.com/en-us/graph/api/table-post-columns?view=graph-rest-1.0&tabs=http
@@ -225,13 +221,13 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/columns".format(
+        url = "me/drive/items/{}/workbook/worksheets/{}/tables/{}/columns".format(
             workbook_id, quote_plus(worksheet_id), table_id
         )
-        return self._client._post(url, **kwargs)
+        return self._client._post(self._client.base_url + url, **kwargs)
 
     @token_required
-    def create_row(self, workbook_id: str, worksheet_id: str, table_id: str, **kwargs) -> Response:
+    def create_table_row(self, workbook_id: str, worksheet_id: str, table_id: str, **kwargs) -> Response:
         """Adds rows to the end of a table.
 
         https://docs.microsoft.com/en-us/graph/api/table-post-rows?view=graph-rest-1.0&tabs=http
@@ -244,13 +240,13 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/tables/{2}/rows".format(
+        url = "me/drive/items/{}/workbook/worksheets/{}/tables/{}/rows".format(
             workbook_id, quote_plus(worksheet_id), table_id
         )
-        return self._client._post(url, **kwargs)
+        return self._client._post(self._client.base_url + url, **kwargs)
 
     @token_required
-    def list_rows(self, workbook_id: str, table_id: str, params: dict = None, **kwargs) -> Response:
+    def list_table_rows(self, workbook_id: str, table_id: str, params: dict = None, **kwargs) -> Response:
         """Retrieve a list of tablerow objects.
 
         https://docs.microsoft.com/en-us/graph/api/table-list-rows?view=graph-rest-1.0&tabs=http
@@ -263,21 +259,11 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/tables/{1}/rows".format(workbook_id, table_id)
-        return self._client._get(url, params=params, **kwargs)
-
-    # @token_required
-    # def excel_get_cell(self, item_id, worksheet_id, params=None, **kwargs):
-    #     url = self.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/Cell(row='1', column='A')".format(item_id, quote_plus(worksheet_id))
-    #     return self._get(url, params=params, **kwargs)
-
-    # @token_required
-    # def excel_add_cell(self, item_id, worksheet_id, **kwargs):
-    #     url = self.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/rows".format(item_id, worksheet_id)
-    #     return self._patch(url, **kwargs)
+        url = "me/drive/items/{}/workbook/tables/{}/rows".format(workbook_id, table_id)
+        return self._client._get(self._client.base_url + url, params=params, **kwargs)
 
     @token_required
-    def get_range(self, workbook_id: str, worksheet_id: str, **kwargs) -> Response:
+    def get_range(self, workbook_id: str, worksheet_id: str, address: str, **kwargs) -> Response:
         """Gets the range object specified by the address or name.
 
         https://docs.microsoft.com/en-us/graph/api/worksheet-range?view=graph-rest-1.0&tabs=http
@@ -285,20 +271,22 @@ class Workbooks(object):
         Args:
             workbook_id (str): Excel file ID.
             worksheet_id (str): Excel worksheet ID.
+            address (str): Address.
 
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/range(address='A1:B2')".format(
-            workbook_id, quote_plus(worksheet_id)
+        url = "me/drive/items/{}/workbook/worksheets/{}/range(address='{}')".format(
+            workbook_id, quote_plus(worksheet_id), address
         )
-        return self._client._get(url, **kwargs)
+        return self._client._get(self._client.base_url + url, **kwargs)
 
     @token_required
-    def update_range(self, workbook_id: str, worksheet_id: str, **kwargs) -> Response:
-        """Update the properties of range object.
+    def get_used_range(self, workbook_id: str, worksheet_id: str, **kwargs) -> Response:
+        """The used range is the smallest range that encompasses any cells that have a value or formatting assigned to
+        them. If the worksheet is blank, this function will return the top left cell.
 
-        https://docs.microsoft.com/en-us/graph/api/range-update?view=graph-rest-1.0&tabs=http
+        https://docs.microsoft.com/en-us/graph/api/worksheet-usedrange?view=graph-rest-1.0&tabs=http
 
         Args:
             workbook_id (str): Excel file ID.
@@ -307,7 +295,26 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = self._client.base_url + "me/drive/items/{0}/workbook/worksheets/{1}/range(address='A1:B2')".format(
-            workbook_id, quote_plus(worksheet_id)
+        url = "me/drive/items/{}/workbook/worksheets/{}/usedRange".format(workbook_id, quote_plus(worksheet_id))
+        return self._client._get(self._client.base_url + url, **kwargs)
+
+    @token_required
+    @workbook_session_id_required
+    def update_range(self, workbook_id: str, worksheet_id: str, address: str, **kwargs) -> Response:
+        """Update the properties of range object.
+
+        https://docs.microsoft.com/en-us/graph/api/range-update?view=graph-rest-1.0&tabs=http
+
+        Args:
+            workbook_id (str): Excel file ID.
+            worksheet_id (str): Excel worksheet ID.
+            address (str): Address.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        headers = {"workbook-session-id": self._client.workbook_session_id}
+        url = "me/drive/items/{}/workbook/worksheets/{}/range(address='{}')".format(
+            workbook_id, quote_plus(worksheet_id), address
         )
-        return self._client._patch(url, **kwargs)
+        return self._client._patch(self._client.base_url + url, headers=headers, **kwargs)

@@ -48,6 +48,7 @@ class Client(object):
 
         self.base_url = self.RESOURCE + self.api_version + "/"
         self.token = None
+        self.workbook_session_id = None
         self.paginate = paginate
 
         self.calendar = Calendar(self)
@@ -166,6 +167,14 @@ class Client(object):
         """
         self.token = token
 
+    def set_workbook_session_id(self, workbook_session_id: dict) -> None:
+        """Sets the Workbook Session Id token for its use in this library.
+
+        Args:
+            token (dict): Workbook Session ID.
+        """
+        self.workbook_session_id = workbook_session_id
+
     def _paginate_response(self, response: dict, **kwargs) -> dict:
         """Some queries against Microsoft Graph return multiple pages of data either due to server-side paging or due to
         the use of the $top query parameter to specifically limit the page size in a request. When a result set spans
@@ -180,7 +189,7 @@ class Client(object):
         Returns:
             dict: Graph API Response.
         """
-        if not self.paginate:
+        if not self.paginate or not isinstance(response.data, dict):
             return response
         while "@odata.nextLink" in response.data:
             data = response.data["value"]
@@ -224,51 +233,51 @@ class Client(object):
         if status_code in (200, 201, 202, 204, 206):
             return r
         elif status_code == 400:
-            raise exceptions.BadRequest(r)
+            raise exceptions.BadRequest(r.data)
         elif status_code == 401:
-            raise exceptions.Unauthorized(r)
+            raise exceptions.Unauthorized(r.data)
         elif status_code == 403:
-            raise exceptions.Forbidden(r)
+            raise exceptions.Forbidden(r.data)
         elif status_code == 404:
-            raise exceptions.NotFound(r)
+            raise exceptions.NotFound(r.data)
         elif status_code == 405:
-            raise exceptions.MethodNotAllowed(r)
+            raise exceptions.MethodNotAllowed(r.data)
         elif status_code == 406:
-            raise exceptions.NotAcceptable(r)
+            raise exceptions.NotAcceptable(r.data)
         elif status_code == 409:
-            raise exceptions.Conflict(r)
+            raise exceptions.Conflict(r.data)
         elif status_code == 410:
-            raise exceptions.Gone(r)
+            raise exceptions.Gone(r.data)
         elif status_code == 411:
-            raise exceptions.LengthRequired(r)
+            raise exceptions.LengthRequired(r.data)
         elif status_code == 412:
-            raise exceptions.PreconditionFailed(r)
+            raise exceptions.PreconditionFailed(r.data)
         elif status_code == 413:
-            raise exceptions.RequestEntityTooLarge(r)
+            raise exceptions.RequestEntityTooLarge(r.data)
         elif status_code == 415:
-            raise exceptions.UnsupportedMediaType(r)
+            raise exceptions.UnsupportedMediaType(r.data)
         elif status_code == 416:
-            raise exceptions.RequestedRangeNotSatisfiable(r)
+            raise exceptions.RequestedRangeNotSatisfiable(r.data)
         elif status_code == 422:
-            raise exceptions.UnprocessableEntity(r)
+            raise exceptions.UnprocessableEntity(r.data)
         elif status_code == 429:
-            raise exceptions.TooManyRequests(r)
+            raise exceptions.TooManyRequests(r.data)
         elif status_code == 500:
-            raise exceptions.InternalServerError(r)
+            raise exceptions.InternalServerError(r.data)
         elif status_code == 501:
-            raise exceptions.NotImplemented(r)
+            raise exceptions.NotImplemented(r.data)
         elif status_code == 503:
-            raise exceptions.ServiceUnavailable(r)
+            raise exceptions.ServiceUnavailable(r.data)
         elif status_code == 504:
-            raise exceptions.GatewayTimeout(r)
+            raise exceptions.GatewayTimeout(r.data)
         elif status_code == 507:
-            raise exceptions.InsufficientStorage(r)
+            raise exceptions.InsufficientStorage(r.data)
         elif status_code == 509:
-            raise exceptions.BandwidthLimitExceeded(r)
+            raise exceptions.BandwidthLimitExceeded(r.data)
         else:
             if r["error"]["innerError"]["code"] == "lockMismatch":
                 # File is currently locked due to being open in the web browser
                 # while attempting to reupload a new version to the drive.
                 # Thus temporarily unavailable.
-                raise exceptions.ServiceUnavailable(r)
-            raise exceptions.UnknownError(r)
+                raise exceptions.ServiceUnavailable(r.data)
+            raise exceptions.UnknownError(r.data)
