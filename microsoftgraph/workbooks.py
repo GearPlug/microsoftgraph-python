@@ -296,10 +296,10 @@ class Workbooks(object):
             Response: Microsoft Graph Response.
         """
         url = "me/drive/items/{}/workbook/worksheets/{}/usedRange".format(workbook_id, quote_plus(worksheet_id))
-        
         return self._client._get(self._client.base_url + url, **kwargs)
 
     @token_required
+    @workbook_session_id_required
     def update_range(self, workbook_id: str, worksheet_id: str, address: str, **kwargs) -> Response:
         """Update the properties of range object.
 
@@ -313,7 +313,8 @@ class Workbooks(object):
         Returns:
             Response: Microsoft Graph Response.
         """
+        headers = {"workbook-session-id": self._client.workbook_session_id}
         url = "me/drive/items/{}/workbook/worksheets/{}/range(address='{}')".format(
             workbook_id, quote_plus(worksheet_id), address
         )
-        return self._client._patch(self._client.base_url + url, **kwargs)
+        return self._client._patch(self._client.base_url + url, headers=headers, **kwargs)
