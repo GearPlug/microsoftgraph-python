@@ -230,6 +230,12 @@ response = client.files.drive_get_item(item_id)
 response = client.files.drive_download_contents(item_id)
 ```
 
+#### Search for files
+```
+query = ".xlsx, .xlsm"
+response = client.files.search_items(query)
+```
+
 ### Workbooks
 #### Create session for specific item
 ```
@@ -288,17 +294,17 @@ response = client.workbooks.add_table(workbook_id)
 
 #### Add column to table
 ```
-response = client.workbooks.create_column(workbook_id, worksheet_id, table_id)
+response = client.workbooks.create_table_column(workbook_id, worksheet_id, table_id)
 ```
 
 #### Add row to table
 ```
-response = client.workbooks.create_row(workbook_id, worksheet_id, table_id)
+response = client.workbooks.create_table_row(workbook_id, worksheet_id, table_id)
 ```
 
 #### Get table rows
 ```
-response = client.workbooks.list_rows(workbook_id, table_id)
+response = client.workbooks.list_table_rows(workbook_id, table_id)
 ```
 
 #### Get range
@@ -306,9 +312,28 @@ response = client.workbooks.list_rows(workbook_id, table_id)
 response = client.workbooks.get_range(workbook_id, worksheet_id)
 ```
 
+#### Get used range
+```
+response = client.workbooks.get_used_range(workbook_id, worksheet_id)
+```
+
 #### Update range
 ```
-response = client.workbooks.update_range(workbook_id, worksheet_id)
+response1 = client.workbooks.create_session(workbook_id)
+workbook_session_id = response1.data["id"]
+
+client.set_workbook_session_id(workbook_session_id)
+
+range_address = "A1:D2"
+data = {
+        "values": [
+            ["John", "Doe", "+1 305 1234567", "Miami, FL"],
+            ["Bill", "Gates", "+1 305 1234567", "St. Redmond, WA"],
+        ]
+}
+response2 = client.workbooks.update_range(workbook_id, worksheet_id, range_address, json=data)
+
+response3 = client.worbooks.close_session(workbook_id)
 ```
 
 ### Webhooks
