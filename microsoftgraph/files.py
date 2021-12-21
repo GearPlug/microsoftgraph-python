@@ -135,22 +135,44 @@ class Files(object):
         return self._client._get(downloadUrl, headers=headers)
 
     @token_required
-    def drive_upload_item(self, item_id: str, params: dict = None, **kwargs) -> Response:
-        """The simple upload API allows you to provide the contents of a new file or update the contents of an existing
-        file in a single API call. This method only supports files up to 4MB in size.
+    def drive_upload_new_file(self, filename: str, file_path: str, params: dict = None, **kwargs) -> Response:
+        """The simple upload API allows you to provide the contents of a new file in a single API call. This method only
+        supports files up to 4MB in size.
 
         https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&tabs=http
 
         Args:
-            item_id (str): Id of a driveItem.
+            filename (str): The name of the item (filename and extension).
+            file_path (str): File path to upload.
             params (dict, optional): Extra params. Defaults to None.
 
         Returns:
             Response: Microsoft Graph Response.
         """
         kwargs["headers"] = {"Content-Type": "text/plain"}
+        content = open(file_path, "rb").read()
+        url = "me/drive/root:{}:/content".format(filename)
+        return self._client._put(self._client.base_url + url, params=params, data=content, **kwargs)
+
+    @token_required
+    def drive_update_existing_file(self, item_id: str, file_path: str, params: dict = None, **kwargs) -> Response:
+        """The simple upload API allows you to update the contents of an existing file in a single API call. This method
+        only supports files up to 4MB in size.
+
+        https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&tabs=http
+
+        Args:
+            item_id (str): Id of a driveItem.
+            file_path (str): File path to upload.
+            params (dict, optional): Extra params. Defaults to None.
+
+        Returns:
+            Response: Microsoft Graph Response.
+        """
+        kwargs["headers"] = {"Content-Type": "text/plain"}
+        content = open(file_path, "rb").read()
         url = "me/drive/items/{}/content".format(item_id)
-        return self._client._put(self._client.base_url + url, params=params, **kwargs)
+        return self._client._put(self._client.base_url + url, params=params, data=content, **kwargs)
 
     @token_required
     def search_items(self, q: str, params: dict = None, **kwargs) -> Response:

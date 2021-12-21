@@ -221,10 +221,7 @@ class Client(object):
             _headers.update(headers)
         if self.requests_hooks:
             kwargs.update({"hooks": self.requests_hooks})
-        if "files" not in kwargs:
-            # If you use the 'files' keyword, the library will set the Content-Type to multipart/form-data
-            # and will generate a boundary.
-            _headers["Content-Type"] = "application/json"
+        
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response):
