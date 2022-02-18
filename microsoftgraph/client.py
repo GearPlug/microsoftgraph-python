@@ -193,7 +193,7 @@ class Client(object):
             return response
         while "@odata.nextLink" in response.data:
             data = response.data["value"]
-            response = self._get(response.data["@odata.nextLink"], **kwargs)
+            response = self._get(response.data["@odata.nextLink"])
             response.data["value"] += data
         return response
 
