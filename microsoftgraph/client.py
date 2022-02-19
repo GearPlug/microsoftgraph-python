@@ -177,7 +177,7 @@ class Client(object):
         self.workbook_session_id = workbook_session_id
 
     def get_next(self, response: Response) -> Optional[Response]:
-        """Retrieves the next page for the argument response if any. This allows to perform a look in case you
+        """Retrieves the next page for the argument response if any. This allows to perform a loop in case you
         want to paginate the response yourself.
 
         Args:
