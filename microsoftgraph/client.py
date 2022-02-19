@@ -233,7 +233,8 @@ class Client(object):
             _headers.update(headers)
         if self.requests_hooks:
             kwargs.update({"hooks": self.requests_hooks})
-        
+        if "Content-Type" not in _headers:
+            _headers["Content-Type"] = "application/json"
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
     def _parse(self, response) -> Response:
