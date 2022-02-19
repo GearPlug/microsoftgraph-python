@@ -184,10 +184,10 @@ class Client(object):
         https://docs.microsoft.com/en-us/graph/paging?context=graph%2Fapi%2F1.0&view=graph-rest-1.0
 
         Args:
-            response (dict): Graph API Response.
+            response (Response): Graph API Response.
 
         Returns:
-            dict: Graph API Response.
+            Response: Graph API Response.
         """
         if not isinstance(response.data, dict):
             return response
