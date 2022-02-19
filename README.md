@@ -230,6 +230,18 @@ response = client.files.drive_get_item(item_id)
 response = client.files.drive_download_contents(item_id)
 ```
 
+#### Upload new file
+```
+# This example uploads the image in path to a file in the signed-in user's drive under Pictures named upload.jpg.
+response = client.files.drive_upload_new_file("/Pictures/upload.jpg", "/mnt/c/Users/i/Downloads/image1.jpg")
+```
+
+#### Update existing file
+```
+# This example uploads the image in path to update an existing item id.
+response = client.files.drive_update_existing_file(item_id, "/mnt/c/Users/i/Downloads/image2.jpg")
+```
+
 #### Search for files
 ```
 query = ".xlsx, .xlsm"
