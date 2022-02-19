@@ -1,3 +1,4 @@
+from typing import Optional
 from urllib.parse import urlencode
 
 import requests
@@ -175,6 +176,24 @@ class Client(object):
         """
         self.workbook_session_id = workbook_session_id
 
+    def get_next(self, response: Response) -> Optional[Response]:
+        """Retrieves the next page for the argument response if any. This allows to perform a loop in case you
+        want to paginate the response yourself.
+
+        Args:
+            response (Response): Graph API Response.
+
+        Returns:
+            Optional[Response]: Graph API Response if available, None otherwise
+        """
+        if not isinstance(response.data, dict):
+            return None
+
+        if "@odata.nextLink" not in response.data:
+            return None
+        
+        return self._do_get(response.data["@odata.nextLink"])
+
     def _paginate_response(self, response: Response) -> Response:
         """Some queries against Microsoft Graph return multiple pages of data either due to server-side paging or due to
         the use of the $top query parameter to specifically limit the page size in a request. When a result set spans
@@ -196,7 +215,7 @@ class Client(object):
         data = list(response.data["value"])
 
         while "@odata.nextLink" in response.data:
-            response = self._do_get(response.data["@odata.nextLink"])
+            response = self.get_next(response)
             data.extend(response.data["value"])
 
         response.data["value"] = data
