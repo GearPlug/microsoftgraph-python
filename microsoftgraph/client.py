@@ -215,7 +215,7 @@ class Client(object):
         data = list(response.data["value"])
 
         while "@odata.nextLink" in response.data:
-            response = self.get_next(response.data["@odata.nextLink"])
+            response = self.get_next(response)
             data.extend(response.data["value"])
 
         response.data["value"] = data
