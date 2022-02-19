@@ -175,7 +175,7 @@ class Client(object):
         """
         self.workbook_session_id = workbook_session_id
 
-    def _paginate_response(self, response: dict, **kwargs) -> dict:
+    def _paginate_response(self, response: Response) -> Response:
         """Some queries against Microsoft Graph return multiple pages of data either due to server-side paging or due to
         the use of the $top query parameter to specifically limit the page size in a request. When a result set spans
         multiple pages, Microsoft Graph returns an @odata.nextLink property in the response that contains a URL to the
@@ -184,21 +184,33 @@ class Client(object):
         https://docs.microsoft.com/en-us/graph/paging?context=graph%2Fapi%2F1.0&view=graph-rest-1.0
 
         Args:
-            response (dict): Graph API Response.
+            response (Response): Graph API Response.
 
         Returns:
-            dict: Graph API Response.
+            Response: Graph API Response.
         """
-        if not self.paginate or not isinstance(response.data, dict):
+        if not isinstance(response.data, dict):
             return response
+
+        # Copy data to avoid side effects
+        data = list(response.data["value"])
+
         while "@odata.nextLink" in response.data:
-            data = response.data["value"]
-            response = self._get(response.data["@odata.nextLink"])
-            response.data["value"] += data
+            response = self._do_get(response.data["@odata.nextLink"])
+            data.extend(response.data["value"])
+
+        response.data["value"] = data
         return response
 
-    def _get(self, url, **kwargs):
-        return self._paginate_response(self._request("GET", url, **kwargs), **kwargs)
+    def _get(self, url, **kwargs) -> Response:
+        response = self._do_get(url, **kwargs)
+        if self.paginate:
+            return self._paginate_response(response)
+
+        return response
+
+    def _do_get(self, url, **kwargs) -> Response:
+        return self._request("GET", url, **kwargs)
 
     def _post(self, url, **kwargs):
         return self._request("POST", url, **kwargs)
@@ -212,7 +224,7 @@ class Client(object):
     def _delete(self, url, **kwargs):
         return self._request("DELETE", url, **kwargs)
 
-    def _request(self, method, url, headers=None, **kwargs):
+    def _request(self, method, url, headers=None, **kwargs) -> Response:
         _headers = {
             "Accept": "application/json",
         }
@@ -227,7 +239,7 @@ class Client(object):
             _headers["Content-Type"] = "application/json"
         return self._parse(requests.request(method, url, headers=_headers, **kwargs))
 
-    def _parse(self, response):
+    def _parse(self, response) -> Response:
         status_code = response.status_code
         r = Response(original=response)
         if status_code in (200, 201, 202, 204, 206):
