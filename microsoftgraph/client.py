@@ -216,7 +216,7 @@ class Client(object):
 
         while "@odata.nextLink" in response.data:
             response = self.get_next(response)
-            if "value" in response.data:
+            if isinstance(response.data, dict) and "value" in response.data:
                 data.extend(response.data["value"])
 
         response.data["value"] = data
