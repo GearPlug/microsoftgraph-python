@@ -208,7 +208,7 @@ class Client(object):
         Returns:
             Response: Graph API Response.
         """
-        if not isinstance(response.data, dict):
+        if not isinstance(response.data, dict) or "value" not in response.data:
             return response
 
         # Copy data to avoid side effects
