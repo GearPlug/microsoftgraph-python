@@ -191,7 +191,7 @@ class Client(object):
 
         if "@odata.nextLink" not in response.data:
             return None
-        
+
         return self._do_get(response.data["@odata.nextLink"])
 
     def _paginate_response(self, response: Response) -> Response:
@@ -216,7 +216,8 @@ class Client(object):
 
         while "@odata.nextLink" in response.data:
             response = self.get_next(response)
-            data.extend(response.data["value"])
+            if isinstance(response.data, dict) and "value" in response.data:
+                data.extend(response.data["value"])
 
         response.data["value"] = data
         return response
