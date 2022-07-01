@@ -24,6 +24,7 @@ class Webhooks(object):
         resource: str,
         expiration_datetime: datetime,
         client_state: str = None,
+        **kwargs,
     ) -> Response:
         """Creates a subscription to start receiving notifications for a resource.
 
@@ -50,6 +51,7 @@ class Webhooks(object):
             "expirationDateTime": expiration_datetime,
             "clientState": client_state,
         }
+        data.update(kwargs)
         return self._client._post(self._client.base_url + "subscriptions", json=data)
 
     @token_required
