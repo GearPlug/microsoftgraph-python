@@ -60,6 +60,9 @@ class Calendar(object):
         location: str,
         calendar_id: str = None,
         content_type: str = "HTML",
+        attendees: list = None,
+        is_online_meeting: bool = False,
+        online_meeting_provider: str = 'teamsForBusiness',
         **kwargs,
     ) -> Response:
         """Create an event in the user's default calendar or specified calendar.
@@ -102,7 +105,15 @@ class Calendar(object):
                 "timeZone": end_timezone,
             },
             "location": {"displayName": location},
+            "isOnlineMeeting": is_online_meeting,
         }
+
+        if is_online_meeting:
+            body["onlineMeetingProvider"] = online_meeting_provider
+
+        if attendees:
+            body["attendees"] = attendees
+
         body.update(kwargs)
         url = "me/calendars/{}/events".format(calendar_id) if calendar_id is not None else "me/events"
         return self._client._post(self._client.base_url + url, json=body)
