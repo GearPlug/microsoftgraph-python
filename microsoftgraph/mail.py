@@ -29,7 +29,7 @@ class Mail(object):
         Returns:
             Response: Microsoft Graph Response.
         """
-        url = "me/mailFolders/{id}/messages".format(folder_id) if folder_id else "me/messages"
+        url = "me/mailFolders/{}/messages".format(folder_id) if folder_id else "me/messages"
         return self._client._get(self._client.base_url + url, params=params)
 
     @token_required
