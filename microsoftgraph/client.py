@@ -248,7 +248,7 @@ class Client(object):
         _headers = {
             "Accept": "application/json",
         }
-        _headers["Authorization"] = "Bearer " + self.token["access_token"]
+        _headers["Authorization"] = "JWT " + self.token["access_token"]
         if headers:
             _headers.update(headers)
         if self.requests_hooks:
@@ -260,7 +260,7 @@ class Client(object):
     def _parse(self, response) -> Response:
         status_code = response.status_code
         r = Response(original=response)
-        if status_code in (200, 201, 202, 204, 206):
+        if status_code < 299:
             return r
         elif status_code == 400:
             raise exceptions.BadRequest(r.data)
