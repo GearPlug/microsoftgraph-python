@@ -248,9 +248,15 @@ class Client(object):
         _headers = {
             "Accept": "application/json",
         }
-        _headers["Authorization"] = "JWT " + self.token["access_token"]
+
         if headers:
             _headers.update(headers)
+
+        if headers in ("JWT_REQUIRED"):
+            _headers["Authorization"] = "JWT " + self.token["access_token"]
+
+        _headers["Authorization"] = "Bearer " + self.token["access_token"]
+
         if self.requests_hooks:
             kwargs.update({"hooks": self.requests_hooks})
         if "Content-Type" not in _headers:
