@@ -2,7 +2,7 @@
 name = "microsoftgraph-python"
 version = "1.1.7"
 description = "API wrapper for Microsoft Graph written in Python"
-authors = ["Miguel Ferrer <ingferrermiguel@gmail.com>"]
+authors = ["Gearplug Team <apps@gearplug.io>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "microsoftgraph"}]
