@@ -252,8 +252,8 @@ class Client(object):
         if headers:
             _headers.update(headers)
 
-        if headers in ("JWT_REQUIRED"):
-            _headers["Authorization"] = "JWT " + self.token["access_token"]
+            if headers in ("JWT_REQUIRED"):
+                _headers["Authorization"] = "JWT " + self.token["access_token"]
 
         _headers["Authorization"] = "Bearer " + self.token["access_token"]
 
