@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "microsoftgraph-python"
-version = "1.1.7"
+version = "1.1.8"
 description = "API wrapper for Microsoft Graph written in Python"
 authors = ["Gearplug Team <apps@gearplug.io>"]
 license = "MIT"
